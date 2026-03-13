@@ -36,6 +36,7 @@ def workspace(tmp_path):
         "name": "test-workspace",
         "nextIssueId": 1,
         "nextProjectId": 1,
+        "reviewers": ["PM", "Dev Lead", "Security"],
     }
     (tracker / "config.json").write_text(json.dumps(config))
     return tmp_path
@@ -49,7 +50,7 @@ def test_read_config(workspace):
 
 def test_create_issue(workspace):
     issue = create_issue(workspace, {"title": "First issue", "status": "open"})
-    assert issue["id"] == "001"
+    assert issue["id"] == 1
     assert issue["title"] == "First issue"
     issue_file = workspace / ".issuetracker" / "issues" / "001.json"
     assert issue_file.exists()
@@ -64,37 +65,48 @@ def test_list_issues(workspace):
     assert len(issues) == 2
     assert warnings == []
     ids = [i["id"] for i in issues]
-    assert "001" in ids
-    assert "002" in ids
+    assert 1 in ids
+    assert 2 in ids
 
 
 def test_get_issue(workspace):
     create_issue(workspace, {"title": "Get me", "status": "open"})
-    issue = get_issue(workspace, "001")
+    issue = get_issue(workspace, 1)
     assert issue is not None
     assert issue["title"] == "Get me"
 
 
 def test_get_issue_not_found(workspace):
-    result = get_issue(workspace, "999")
+    result = get_issue(workspace, 999)
     assert result is None
 
 
 def test_update_issue(workspace):
     create_issue(workspace, {"title": "Old title", "status": "open"})
-    updated = update_issue(workspace, "001", {"title": "New title", "status": "closed"})
+    updated = update_issue(workspace, 1, {"title": "New title", "status": "closed"})
     assert updated["title"] == "New title"
     assert updated["status"] == "closed"
-    re_read = get_issue(workspace, "001")
+    re_read = get_issue(workspace, 1)
     assert re_read["title"] == "New title"
     assert re_read["status"] == "closed"
 
 
+def test_update_issue_not_found(workspace):
+    result = update_issue(workspace, 999, {"title": "Ghost"})
+    assert result is None
+
+
 def test_delete_issue(workspace):
     create_issue(workspace, {"title": "To delete", "status": "open"})
-    assert get_issue(workspace, "001") is not None
-    delete_issue(workspace, "001")
-    assert get_issue(workspace, "001") is None
+    assert get_issue(workspace, 1) is not None
+    result = delete_issue(workspace, 1)
+    assert result is True
+    assert get_issue(workspace, 1) is None
+
+
+def test_delete_issue_not_found(workspace):
+    result = delete_issue(workspace, 999)
+    assert result is False
 
 
 def test_circular_dependency_rejected(workspace):
@@ -114,7 +126,7 @@ def test_orphaned_dependency_cleanup(workspace):
 
 def test_create_project(workspace):
     project = create_project(workspace, {"name": "Project Alpha", "status": "active"})
-    assert project["id"] == "001"
+    assert project["id"] == 1
     assert project["name"] == "Project Alpha"
     project_file = workspace / ".issuetracker" / "projects" / "001.json"
     assert project_file.exists()
@@ -132,17 +144,28 @@ def test_list_projects(workspace):
 
 def test_update_project(workspace):
     create_project(workspace, {"name": "Old Name", "status": "active"})
-    updated = update_project(workspace, "001", {"name": "New Name"})
+    updated = update_project(workspace, 1, {"name": "New Name"})
     assert updated["name"] == "New Name"
-    re_read = get_project(workspace, "001")
+    re_read = get_project(workspace, 1)
     assert re_read["name"] == "New Name"
+
+
+def test_update_project_not_found(workspace):
+    result = update_project(workspace, 999, {"name": "Ghost"})
+    assert result is None
 
 
 def test_delete_project(workspace):
     create_project(workspace, {"name": "Temp Project", "status": "active"})
-    assert get_project(workspace, "001") is not None
-    delete_project(workspace, "001")
-    assert get_project(workspace, "001") is None
+    assert get_project(workspace, 1) is not None
+    result = delete_project(workspace, 1)
+    assert result is True
+    assert get_project(workspace, 1) is None
+
+
+def test_delete_project_not_found(workspace):
+    result = delete_project(workspace, 999)
+    assert result is False
 
 
 def test_init_workspace(tmp_path):
@@ -189,3 +212,39 @@ def test_malformed_issue_skipped(workspace):
     assert len(issues) == 1
     assert len(warnings) == 1
     assert "002.json" in warnings[0]
+    # Warning should include error detail, not just the filename
+    assert len(warnings[0]) > len("002.json")
+
+
+def test_list_issues_recreates_missing_dir(tmp_path):
+    """list_issues should auto-recreate a missing issues directory."""
+    tracker = tmp_path / ".issuetracker"
+    tracker.mkdir()
+    config = {
+        "name": "test-workspace",
+        "nextIssueId": 1,
+        "nextProjectId": 1,
+    }
+    (tracker / "config.json").write_text(json.dumps(config))
+    # issues dir intentionally not created
+    issues, warnings = list_issues(tmp_path)
+    assert issues == []
+    assert warnings == []
+    assert (tracker / "issues").exists()
+
+
+def test_list_projects_recreates_missing_dir(tmp_path):
+    """list_projects should auto-recreate a missing projects directory."""
+    tracker = tmp_path / ".issuetracker"
+    tracker.mkdir()
+    config = {
+        "name": "test-workspace",
+        "nextIssueId": 1,
+        "nextProjectId": 1,
+    }
+    (tracker / "config.json").write_text(json.dumps(config))
+    # projects dir intentionally not created
+    projects, warnings = list_projects(tmp_path)
+    assert projects == []
+    assert warnings == []
+    assert (tracker / "projects").exists()

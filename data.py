@@ -1,3 +1,11 @@
+"""Data layer for .issuetracker file I/O.
+
+Handles all reads/writes to .issuetracker/ folders including
+config management, issue CRUD, project CRUD, ID allocation,
+atomic writes, and dependency validation.
+"""
+from __future__ import annotations
+
 import json
 import os
 import shutil
@@ -29,8 +37,9 @@ def _atomic_write(path: Path, data: dict) -> None:
     try:
         with os.fdopen(fd, "w") as f:
             json.dump(data, f, indent=2)
+            f.write("\n")
         os.replace(tmp, path)
-    except Exception:
+    except BaseException:
         try:
             os.unlink(tmp)
         except OSError:
@@ -38,30 +47,30 @@ def _atomic_write(path: Path, data: dict) -> None:
         raise
 
 
-def _issue_path(workspace: Path, issue_id: str) -> Path:
-    return _tracker_path(workspace) / "issues" / f"{issue_id}.json"
+def _issue_path(workspace: Path, issue_id: int) -> Path:
+    return _tracker_path(workspace) / "issues" / f"{issue_id:03d}.json"
 
 
-def _project_path(workspace: Path, project_id: str) -> Path:
-    return _tracker_path(workspace) / "projects" / f"{project_id}.json"
+def _project_path(workspace: Path, project_id: int) -> Path:
+    return _tracker_path(workspace) / "projects" / f"{project_id:03d}.json"
 
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def _has_cycle(workspace: Path, issue_id: str, blocked_by: list) -> bool:
+def _has_cycle(workspace: Path, issue_id: int, blocked_by: list) -> bool:
     """Return True if adding blocked_by edges to issue_id would create a cycle."""
     # Build adjacency: issue -> list of issues it is blocked by
     issues, _ = list_issues(workspace)
-    graph: dict[str, list[str]] = {}
+    graph: dict[int, list[int]] = {}
     for issue in issues:
         graph[issue["id"]] = list(issue.get("blockedBy", []))
     # Apply the proposed change
     graph[issue_id] = list(blocked_by)
 
     # DFS from issue_id — if we can reach issue_id again, there's a cycle
-    visited: set[str] = set()
+    visited: set[int] = set()
     stack = list(blocked_by)
     while stack:
         node = stack.pop()
@@ -96,7 +105,7 @@ def write_config(workspace: Path, config: dict) -> None:
 def create_issue(workspace: Path, data: dict) -> dict:
     config = read_config(workspace)
     next_id = config.get("nextIssueId", 1)
-    issue_id = f"{next_id:03d}"
+    issue_id = next_id
 
     issues_dir = _tracker_path(workspace) / "issues"
     _ensure_dir(issues_dir)
@@ -120,20 +129,19 @@ def list_issues(workspace: Path) -> tuple[list[dict], list[str]]:
     issues: list[dict] = []
     warnings: list[str] = []
 
-    if not issues_dir.exists():
-        return issues, warnings
+    _ensure_dir(issues_dir)
 
     for p in sorted(issues_dir.glob("*.json")):
         try:
             with open(p) as f:
                 issues.append(json.load(f))
-        except (json.JSONDecodeError, OSError):
-            warnings.append(p.name)
+        except (json.JSONDecodeError, OSError) as e:
+            warnings.append(f"Failed to load {p.name}: {e}")
 
     return issues, warnings
 
 
-def get_issue(workspace: Path, issue_id: str) -> dict | None:
+def get_issue(workspace: Path, issue_id: int) -> dict | None:
     path = _issue_path(workspace, issue_id)
     if not path.exists():
         return None
@@ -141,10 +149,10 @@ def get_issue(workspace: Path, issue_id: str) -> dict | None:
         return json.load(f)
 
 
-def update_issue(workspace: Path, issue_id: str, updates: dict) -> dict:
+def update_issue(workspace: Path, issue_id: int, updates: dict) -> dict | None:
     issue = get_issue(workspace, issue_id)
     if issue is None:
-        raise FileNotFoundError(f"Issue {issue_id} not found")
+        return None
 
     if "blockedBy" in updates:
         if _has_cycle(workspace, issue_id, updates["blockedBy"]):
@@ -158,13 +166,14 @@ def update_issue(workspace: Path, issue_id: str, updates: dict) -> dict:
     return issue
 
 
-def delete_issue(workspace: Path, issue_id: str) -> None:
+def delete_issue(workspace: Path, issue_id: int) -> bool:
     path = _issue_path(workspace, issue_id)
-    if path.exists():
-        path.unlink()
+    if not path.exists():
+        return False
+    path.unlink()
 
     # Delete assets folder for this issue if it exists
-    assets_dir = _tracker_path(workspace) / "assets" / issue_id
+    assets_dir = _tracker_path(workspace) / "assets" / str(issue_id)
     if assets_dir.exists():
         shutil.rmtree(assets_dir)
 
@@ -178,6 +187,8 @@ def delete_issue(workspace: Path, issue_id: str) -> None:
             issue["updatedAt"] = _now_iso()
             _atomic_write(_issue_path(workspace, issue["id"]), issue)
 
+    return True
+
 
 # ---------------------------------------------------------------------------
 # Projects
@@ -186,7 +197,7 @@ def delete_issue(workspace: Path, issue_id: str) -> None:
 def create_project(workspace: Path, data: dict) -> dict:
     config = read_config(workspace)
     next_id = config.get("nextProjectId", 1)
-    project_id = f"{next_id:03d}"
+    project_id = next_id
 
     projects_dir = _tracker_path(workspace) / "projects"
     _ensure_dir(projects_dir)
@@ -210,20 +221,19 @@ def list_projects(workspace: Path) -> tuple[list[dict], list[str]]:
     projects: list[dict] = []
     warnings: list[str] = []
 
-    if not projects_dir.exists():
-        return projects, warnings
+    _ensure_dir(projects_dir)
 
     for p in sorted(projects_dir.glob("*.json")):
         try:
             with open(p) as f:
                 projects.append(json.load(f))
-        except (json.JSONDecodeError, OSError):
-            warnings.append(p.name)
+        except (json.JSONDecodeError, OSError) as e:
+            warnings.append(f"Failed to load {p.name}: {e}")
 
     return projects, warnings
 
 
-def get_project(workspace: Path, project_id: str) -> dict | None:
+def get_project(workspace: Path, project_id: int) -> dict | None:
     path = _project_path(workspace, project_id)
     if not path.exists():
         return None
@@ -231,20 +241,22 @@ def get_project(workspace: Path, project_id: str) -> dict | None:
         return json.load(f)
 
 
-def update_project(workspace: Path, project_id: str, updates: dict) -> dict:
+def update_project(workspace: Path, project_id: int, updates: dict) -> dict | None:
     project = get_project(workspace, project_id)
     if project is None:
-        raise FileNotFoundError(f"Project {project_id} not found")
+        return None
     project.update(updates)
     project["updatedAt"] = _now_iso()
     _atomic_write(_project_path(workspace, project_id), project)
     return project
 
 
-def delete_project(workspace: Path, project_id: str) -> None:
+def delete_project(workspace: Path, project_id: int) -> bool:
     path = _project_path(workspace, project_id)
-    if path.exists():
-        path.unlink()
+    if not path.exists():
+        return False
+    path.unlink()
+    return True
 
 
 # ---------------------------------------------------------------------------
