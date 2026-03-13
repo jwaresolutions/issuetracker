@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Issue Tracker</title>
+  <style>
+    /* ─── CSS Variables & Reset ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #0d1117;
+      --bg-surface:   #161b22;
+      --bg-elevated:  #1f2937;
+      --bg-hover:     #21262d;
+      --border:       #30363d;
+      --text:         #e6edf3;
+      --text-muted:   #8b949e;
+      --accent:       #58a6ff;
+      --green:        #3fb950;
+      --amber:        #d29922;
+      --red:          #f85149;
+      --gray:         #6e7681;
+      --font-mono:    'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      --radius:       6px;
+      --radius-lg:    10px;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* ─── Header ─── */
+    #header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    #header-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    #header-logo svg {
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    #workspace-select-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 8px;
+    }
+
+    #workspace-select-wrapper label {
+      color: var(--text-muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .ws-select-inner {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 4px 8px;
+    }
+
+    #ws-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gray);
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+
+    #ws-status-dot.active { background: var(--green); }
+
+    select {
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+      min-width: 160px;
+    }
+
+    select option {
+      background: var(--bg-elevated);
+      color: var(--text);
+    }
+
+    #header-spacer { flex: 1; }
+
+    #btn-init-workspace {
+      display: none;
+      padding: 5px 12px;
+      background: var(--green);
+      color: #000;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    #btn-init-workspace:hover { opacity: 0.85; }
+
+    #btn-settings {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 5px 8px;
+      display: flex;
+      align-items: center;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    #btn-settings:hover {
+      color: var(--text);
+      border-color: var(--text-muted);
+    }
+
+    /* ─── Main Layout ─── */
+    #main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* ─── Error Banner ─── */
+    #error-banner {
+      display: none;
+      background: rgba(248, 81, 73, 0.15);
+      border: 1px solid var(--red);
+      border-radius: var(--radius);
+      color: var(--red);
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #error-banner.visible {
+      display: flex;
+    }
+
+    #error-banner-close {
+      margin-left: auto;
+      background: none;
+      border: none;
+      color: var(--red);
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      padding: 0 2px;
+    }
+
+    /* ─── Stats Grid ─── */
+    #stats-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 900px) {
+      #stats-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    @media (max-width: 500px) {
+      #stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .stat-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stat-card .stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .stat-card .stat-value {
+      font-size: 26px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .stat-card.stat-open    .stat-value { color: var(--accent); }
+    .stat-card.stat-prog    .stat-value { color: var(--amber); }
+    .stat-card.stat-done    .stat-value { color: var(--green); }
+    .stat-card.stat-blocked .stat-value { color: var(--red); }
+    .stat-card.stat-high    .stat-value { color: var(--red); }
+
+    /* ─── Filters Bar ─── */
+    #filters-bar {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .filter-group-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      white-space: nowrap;
+      margin-right: 2px;
+    }
+
+    /* ─── Toggle Buttons ─── */
+    .toggle-btn {
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+
+    .toggle-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text);
+    }
+
+    .toggle-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(88, 166, 255, 0.1);
+    }
+
+    .toggle-btn.active.status-open       { border-color: var(--accent);  color: var(--accent);  background: rgba(88,166,255,0.1); }
+    .toggle-btn.active.status-in_progress{ border-color: var(--amber);   color: var(--amber);   background: rgba(210,153,34,0.1); }
+    .toggle-btn.active.status-done       { border-color: var(--green);   color: var(--green);   background: rgba(63,185,80,0.1); }
+    .toggle-btn.active.status-closed     { border-color: var(--gray);    color: var(--gray);    background: rgba(110,118,129,0.1); }
+    .toggle-btn.active.priority-high     { border-color: var(--red);     color: var(--red);     background: rgba(248,81,73,0.1); }
+    .toggle-btn.active.priority-medium   { border-color: var(--amber);   color: var(--amber);   background: rgba(210,153,34,0.1); }
+    .toggle-btn.active.priority-low      { border-color: var(--green);   color: var(--green);   background: rgba(63,185,80,0.1); }
+
+    /* ─── Filter Selects & Inputs ─── */
+    .filter-select {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 12px;
+      font-family: inherit;
+      padding: 4px 8px;
+      outline: none;
+      cursor: pointer;
+      min-width: 130px;
+      transition: border-color 0.15s;
+    }
+
+    .filter-select:hover, .filter-select:focus {
+      border-color: var(--accent);
+    }
+
+    .filter-select option {
+      background: var(--bg-elevated);
+      color: var(--text);
+    }
+
+    #search-input {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 12px;
+      font-family: inherit;
+      padding: 4px 10px 4px 28px;
+      outline: none;
+      width: 200px;
+      transition: border-color 0.15s, width 0.2s;
+      position: relative;
+    }
+
+    #search-input:focus {
+      border-color: var(--accent);
+      width: 240px;
+    }
+
+    #search-input::placeholder { color: var(--text-muted); }
+
+    .search-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 8px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    /* ─── Hide Voted Checkbox ─── */
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+      accent-color: var(--accent);
+      width: 14px;
+      height: 14px;
+      cursor: pointer;
+    }
+
+    /* ─── Toolbar (table controls) ─── */
+    #toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    #issue-count {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    #issue-count span {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .btn-primary {
+      padding: 6px 14px;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary:hover { opacity: 0.85; }
+
+    /* ─── Issues Table ─── */
+    #issues-table-wrapper {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    #issues-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    #issues-table thead tr {
+      border-bottom: 1px solid var(--border);
+    }
+
+    #issues-table th {
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      white-space: nowrap;
+      background: var(--bg-elevated);
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.15s;
+    }
+
+    #issues-table th:hover { color: var(--text); }
+
+    #issues-table th.sorted { color: var(--accent); }
+
+    #issues-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      font-size: 13px;
+    }
+
+    #issues-table tbody tr:last-child td { border-bottom: none; }
+
+    #issues-table tbody tr:hover td {
+      background: var(--bg-hover);
+      cursor: pointer;
+    }
+
+    /* expand indicator */
+    .expand-col {
+      width: 32px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+
+    /* Expand row */
+    .expand-row td {
+      padding: 0 !important;
+      background: var(--bg-elevated) !important;
+      cursor: default !important;
+    }
+
+    .expand-row:hover td { background: var(--bg-elevated) !important; }
+
+    .expand-row-inner {
+      padding: 14px 20px 14px 46px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ─── Badges ─── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+      font-family: var(--font-mono);
+    }
+
+    .badge-status-open       { background: rgba(88,166,255,0.15);  color: var(--accent); border: 1px solid rgba(88,166,255,0.3); }
+    .badge-status-in_progress{ background: rgba(210,153,34,0.15);  color: var(--amber);  border: 1px solid rgba(210,153,34,0.3); }
+    .badge-status-done       { background: rgba(63,185,80,0.15);   color: var(--green);  border: 1px solid rgba(63,185,80,0.3); }
+    .badge-status-closed     { background: rgba(110,118,129,0.15); color: var(--gray);   border: 1px solid rgba(110,118,129,0.3); }
+
+    .badge-priority-high   { background: rgba(248,81,73,0.15);   color: var(--red);    border: 1px solid rgba(248,81,73,0.3); }
+    .badge-priority-medium { background: rgba(210,153,34,0.15);  color: var(--amber);  border: 1px solid rgba(210,153,34,0.3); }
+    .badge-priority-low    { background: rgba(63,185,80,0.15);   color: var(--green);  border: 1px solid rgba(63,185,80,0.3); }
+
+    .badge-label {
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .badge-vote-approve  { background: rgba(63,185,80,0.15);   color: var(--green); border: 1px solid rgba(63,185,80,0.3); }
+    .badge-vote-reject   { background: rgba(248,81,73,0.15);   color: var(--red);   border: 1px solid rgba(248,81,73,0.3); }
+    .badge-vote-pending  { background: rgba(110,118,129,0.15); color: var(--gray);  border: 1px solid rgba(110,118,129,0.3); }
+
+    .labels-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    /* ─── Empty State ─── */
+    #empty-state {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      gap: 10px;
+      text-align: center;
+    }
+
+    #empty-state svg { opacity: 0.4; }
+    #empty-state .empty-title { font-size: 15px; font-weight: 600; color: var(--text); }
+    #empty-state .empty-sub   { font-size: 13px; }
+
+    /* ─── Quick Wins Section ─── */
+    #quick-wins-section {
+      margin-bottom: 24px;
+    }
+
+    #quick-wins-section h2 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #quick-wins-section h2 .qw-badge {
+      background: var(--amber);
+      color: #000;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+
+    #quick-wins-list {
+      /* populated in Task 8 */
+    }
+
+    /* ─── Modals ─── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 640px;
+      max-height: 90vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-header h3 {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 0 4px;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+
+    .modal-close:hover { color: var(--text); }
+
+    .modal-body {
+      padding: 20px;
+      flex: 1;
+    }
+
+    .modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ─── Forms ─── */
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .form-control {
+      width: 100%;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 13px;
+      font-family: inherit;
+      padding: 7px 10px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .form-control:focus { border-color: var(--accent); }
+
+    textarea.form-control {
+      resize: vertical;
+      min-height: 80px;
+      font-family: var(--font-mono);
+    }
+
+    .btn-ghost {
+      padding: 6px 14px;
+      background: none;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .btn-ghost:hover {
+      color: var(--text);
+      border-color: var(--text-muted);
+    }
+
+    .btn-danger {
+      padding: 6px 14px;
+      background: none;
+      color: var(--red);
+      border: 1px solid var(--red);
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-danger:hover { background: rgba(248,81,73,0.1); }
+
+    /* ─── No-Workspace State ─── */
+    #no-workspace-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 20px;
+      color: var(--text-muted);
+      text-align: center;
+      gap: 12px;
+    }
+
+    #no-workspace-state .nws-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    #no-workspace-state .nws-sub {
+      font-size: 14px;
+      max-width: 400px;
+    }
+
+    /* ─── Loading Spinner ─── */
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── Scrollbar styling ─── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+<!-- ─── Header ─── -->
+<header id="header">
+  <div id="header-logo">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    Issue Tracker
+  </div>
+
+  <div id="workspace-select-wrapper">
+    <label for="workspace-select">Workspace</label>
+    <div class="ws-select-inner">
+      <div id="ws-status-dot" title="No tracker initialized"></div>
+      <select id="workspace-select">
+        <option value="">— select workspace —</option>
+      </select>
+    </div>
+  </div>
+
+  <button id="btn-init-workspace">Initialize Tracker</button>
+
+  <div id="header-spacer"></div>
+
+  <button id="btn-settings" title="Settings (coming soon)">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </svg>
+  </button>
+</header>
+
+<!-- ─── Main Content ─── -->
+<main id="main">
+
+  <!-- Error Banner -->
+  <div id="error-banner" role="alert">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span id="error-banner-text"></span>
+    <button id="error-banner-close" aria-label="Dismiss">&times;</button>
+  </div>
+
+  <!-- No Workspace State -->
+  <div id="no-workspace-state">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--text-muted); opacity: 0.4">
+      <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+      <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+    </svg>
+    <div class="nws-title">No workspace selected</div>
+    <div class="nws-sub">Select a workspace from the dropdown above to view issues and projects.</div>
+  </div>
+
+  <!-- Content shown after workspace is loaded -->
+  <div id="workspace-content" style="display: none;">
+
+    <!-- Stats Grid -->
+    <div id="stats-grid">
+      <div class="stat-card stat-total">
+        <div class="stat-label">Total</div>
+        <div class="stat-value" id="stat-total">0</div>
+      </div>
+      <div class="stat-card stat-open">
+        <div class="stat-label">Open</div>
+        <div class="stat-value" id="stat-open">0</div>
+      </div>
+      <div class="stat-card stat-prog">
+        <div class="stat-label">In Progress</div>
+        <div class="stat-value" id="stat-in-progress">0</div>
+      </div>
+      <div class="stat-card stat-done">
+        <div class="stat-label">Done</div>
+        <div class="stat-value" id="stat-done">0</div>
+      </div>
+      <div class="stat-card stat-blocked">
+        <div class="stat-label">Blocked</div>
+        <div class="stat-value" id="stat-blocked">0</div>
+      </div>
+      <div class="stat-card stat-high">
+        <div class="stat-label">High Priority</div>
+        <div class="stat-value" id="stat-high">0</div>
+      </div>
+    </div>
+
+    <!-- Filters Bar -->
+    <div id="filters-bar">
+      <!-- Status toggles -->
+      <div class="filter-group">
+        <span class="filter-group-label">Status</span>
+        <button class="toggle-btn active" data-filter="status" data-value="all">All</button>
+        <button class="toggle-btn status-open" data-filter="status" data-value="open">Open</button>
+        <button class="toggle-btn status-in_progress" data-filter="status" data-value="in_progress">In Progress</button>
+        <button class="toggle-btn status-done" data-filter="status" data-value="done">Done</button>
+        <button class="toggle-btn status-closed" data-filter="status" data-value="closed">Closed</button>
+      </div>
+
+      <!-- Priority toggles -->
+      <div class="filter-group">
+        <span class="filter-group-label">Priority</span>
+        <button class="toggle-btn active" data-filter="priority" data-value="all">All</button>
+        <button class="toggle-btn priority-high" data-filter="priority" data-value="high">High</button>
+        <button class="toggle-btn priority-medium" data-filter="priority" data-value="medium">Medium</button>
+        <button class="toggle-btn priority-low" data-filter="priority" data-value="low">Low</button>
+      </div>
+
+      <!-- Project filter -->
+      <div class="filter-group">
+        <span class="filter-group-label">Project</span>
+        <select id="filter-project" class="filter-select">
+          <option value="">All projects</option>
+        </select>
+      </div>
+
+      <!-- Label filter -->
+      <div class="filter-group">
+        <span class="filter-group-label">Label</span>
+        <select id="filter-label" class="filter-select" multiple size="1" title="Hold Ctrl/Cmd to select multiple">
+          <option value="">All labels</option>
+        </select>
+      </div>
+
+      <!-- Search -->
+      <div class="filter-group">
+        <div class="search-wrapper">
+          <svg class="search-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text" id="search-input" placeholder="Search issues…" autocomplete="off" />
+        </div>
+      </div>
+
+      <!-- Hide voted -->
+      <div class="filter-group">
+        <label class="checkbox-label">
+          <input type="checkbox" id="hide-voted" />
+          Hide voted
+        </label>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div id="toolbar">
+      <div id="issue-count">Showing <span id="count-visible">0</span> of <span id="count-total">0</span> issues</div>
+      <button class="btn-primary" id="btn-new-issue">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Issue
+      </button>
+    </div>
+
+    <!-- Issues Table -->
+    <div id="issues-table-wrapper">
+      <table id="issues-table">
+        <thead>
+          <tr>
+            <th class="expand-col"></th>
+            <th data-sort="id">#</th>
+            <th data-sort="title">Title</th>
+            <th data-sort="status">Status</th>
+            <th data-sort="priority">Priority</th>
+            <th>Labels</th>
+            <th data-sort="projectId">Project</th>
+            <th>Reviews</th>
+            <th>Vote</th>
+            <th data-sort="updatedAt">Updated</th>
+          </tr>
+        </thead>
+        <tbody id="issues-tbody">
+          <!-- populated by renderTable() in Task 7 -->
+        </tbody>
+      </table>
+
+      <!-- Empty state inside table wrapper -->
+      <div id="empty-state">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+        <div class="empty-title">No issues found</div>
+        <div class="empty-sub">Try adjusting your filters or create a new issue.</div>
+      </div>
+    </div>
+
+    <!-- Quick Wins Section (populated in Task 8) -->
+    <div id="quick-wins-section" style="display: none;">
+      <h2>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Quick Wins
+        <span class="qw-badge" id="quick-wins-count">0</span>
+      </h2>
+      <div id="quick-wins-list"></div>
+    </div>
+
+  </div><!-- /workspace-content -->
+
+</main>
+
+<!-- ─── Modals (populated in Tasks 7–9) ─── -->
+
+<!-- Issue Detail / Edit Modal placeholder -->
+<div class="modal-overlay" id="modal-issue-overlay">
+  <div class="modal" id="modal-issue">
+    <div class="modal-header">
+      <h3 id="modal-issue-title">Issue</h3>
+      <button class="modal-close" data-close="modal-issue-overlay">&times;</button>
+    </div>
+    <div class="modal-body" id="modal-issue-body">
+      <!-- populated in Task 7 -->
+    </div>
+    <div class="modal-footer" id="modal-issue-footer">
+      <!-- populated in Task 7 -->
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal placeholder -->
+<div class="modal-overlay" id="modal-settings-overlay">
+  <div class="modal" id="modal-settings">
+    <div class="modal-header">
+      <h3>Settings</h3>
+      <button class="modal-close" data-close="modal-settings-overlay">&times;</button>
+    </div>
+    <div class="modal-body" id="modal-settings-body">
+      <!-- populated in Task 9 -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" data-close="modal-settings-overlay">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── State & Config ───────────────────────────────────────────────────────────
+
+const API_BASE = '';  // same origin
+
+const state = {
+  workspaces: [],         // [{name, path, hasTracker}]
+  currentWorkspace: null, // string name
+  issues: [],             // raw issues from API
+  projects: [],           // raw projects from API
+
+  // Active filter sets — multi-select
+  filters: {
+    status:   new Set(['all']),   // 'all' means no filter applied
+    priority: new Set(['all']),
+    project:  '',                 // single select
+    labels:   new Set(),          // empty = all
+    search:   '',
+    hideVoted: false,
+  },
+
+  // Sort state (used by Task 7)
+  sort: {
+    col: 'id',
+    dir: 'desc',
+  },
+};
+
+
+// ─── API Helpers ──────────────────────────────────────────────────────────────
+
+async function apiFetch(path, options = {}) {
+  const res = await fetch(API_BASE + path, {
+    headers: { 'Content-Type': 'application/json', ...options.headers },
+    ...options,
+  });
+  if (!res.ok) {
+    let msg = `HTTP ${res.status}`;
+    try {
+      const body = await res.json();
+      msg = body.detail || body.message || msg;
+    } catch (_) {}
+    throw new Error(msg);
+  }
+  return res.json();
+}
+
+const api = {
+  getWorkspaces:    ()             => apiFetch('/api/workspaces'),
+  initWorkspace:    (name)         => apiFetch(`/api/workspaces/${encodeURIComponent(name)}/init`, { method: 'POST' }),
+  getIssues:        (name)         => apiFetch(`/api/workspaces/${encodeURIComponent(name)}/issues`),
+  createIssue:      (name, body)   => apiFetch(`/api/workspaces/${encodeURIComponent(name)}/issues`, { method: 'POST', body: JSON.stringify(body) }),
+  getIssue:         (name, id)     => apiFetch(`/api/workspaces/${encodeURIComponent(name)}/issues/${id}`),
+  updateIssue:      (name, id, b)  => apiFetch(`/api/workspaces/${encodeURIComponent(name)}/issues/${id}`, { method: 'PUT', body: JSON.stringify(b) }),
+  deleteIssue:      (name, id)     => apiFetch(`/api/workspaces/${encodeURIComponent(name)}/issues/${id}`, { method: 'DELETE' }),
+  updateVote:       (name, id, b)  => apiFetch(`/api/workspaces/${encodeURIComponent(name)}/issues/${id}/vote`, { method: 'PUT', body: JSON.stringify(b) }),
+  updateReview:     (name, id, b)  => apiFetch(`/api/workspaces/${encodeURIComponent(name)}/issues/${id}/reviews`, { method: 'PUT', body: JSON.stringify(b) }),
+  getProjects:      (name)         => apiFetch(`/api/workspaces/${encodeURIComponent(name)}/projects`),
+  createProject:    (name, body)   => apiFetch(`/api/workspaces/${encodeURIComponent(name)}/projects`, { method: 'POST', body: JSON.stringify(body) }),
+  updateProject:    (name, id, b)  => apiFetch(`/api/workspaces/${encodeURIComponent(name)}/projects/${id}`, { method: 'PUT', body: JSON.stringify(b) }),
+  deleteProject:    (name, id)     => apiFetch(`/api/workspaces/${encodeURIComponent(name)}/projects/${id}`, { method: 'DELETE' }),
+  getConfig:        ()             => apiFetch('/api/config'),
+  putConfig:        (body)         => apiFetch('/api/config', { method: 'PUT', body: JSON.stringify(body) }),
+};
+
+
+// ─── Error Handling ───────────────────────────────────────────────────────────
+
+function showError(msg) {
+  const banner = document.getElementById('error-banner');
+  document.getElementById('error-banner-text').textContent = msg;
+  banner.classList.add('visible');
+}
+
+function hideError() {
+  document.getElementById('error-banner').classList.remove('visible');
+}
+
+document.getElementById('error-banner-close').addEventListener('click', hideError);
+
+
+// ─── Workspace Logic ──────────────────────────────────────────────────────────
+
+async function loadWorkspaces() {
+  try {
+    const data = await api.getWorkspaces();
+    state.workspaces = data;
+    renderWorkspaceDropdown();
+  } catch (err) {
+    showError('Failed to load workspaces: ' + err.message);
+  }
+}
+
+function renderWorkspaceDropdown() {
+  const sel = document.getElementById('workspace-select');
+  // Keep the placeholder option
+  sel.innerHTML = '<option value="">— select workspace —</option>';
+  state.workspaces.forEach(ws => {
+    const opt = document.createElement('option');
+    opt.value = ws.name;
+    opt.textContent = ws.name + (ws.hasTracker ? '' : ' (not initialized)');
+    sel.appendChild(opt);
+  });
+}
+
+function getWorkspace(name) {
+  return state.workspaces.find(w => w.name === name) || null;
+}
+
+async function selectWorkspace(name) {
+  if (!name) {
+    state.currentWorkspace = null;
+    state.issues = [];
+    state.projects = [];
+    document.getElementById('workspace-content').style.display = 'none';
+    document.getElementById('no-workspace-state').style.display = '';
+    document.getElementById('btn-init-workspace').style.display = 'none';
+    updateWsDot(false);
+    return;
+  }
+
+  const ws = getWorkspace(name);
+  if (!ws) return;
+
+  state.currentWorkspace = name;
+
+  if (!ws.hasTracker) {
+    // Show init button, hide content
+    document.getElementById('btn-init-workspace').style.display = '';
+    document.getElementById('workspace-content').style.display = 'none';
+    document.getElementById('no-workspace-state').style.display = '';
+    updateWsDot(false);
+    return;
+  }
+
+  // Has tracker — fetch data
+  document.getElementById('btn-init-workspace').style.display = 'none';
+  updateWsDot(true);
+
+  try {
+    hideError();
+    const [issueRes, projectRes] = await Promise.all([
+      api.getIssues(name),
+      api.getProjects(name),
+    ]);
+    state.issues   = issueRes.issues   || [];
+    state.projects = projectRes.projects || [];
+
+    if (issueRes.warnings && issueRes.warnings.length) {
+      showError('Warnings: ' + issueRes.warnings.join('; '));
+    }
+
+    renderStats();
+    populateProjectFilter();
+    populateLabelFilter();
+    renderTable();
+
+    document.getElementById('no-workspace-state').style.display = 'none';
+    document.getElementById('workspace-content').style.display = '';
+  } catch (err) {
+    showError('Failed to load workspace data: ' + err.message);
+  }
+}
+
+async function initWorkspace() {
+  const name = state.currentWorkspace;
+  if (!name) return;
+  try {
+    hideError();
+    await api.initWorkspace(name);
+    // Refresh workspace list
+    await loadWorkspaces();
+    await selectWorkspace(name);
+  } catch (err) {
+    showError('Failed to initialize workspace: ' + err.message);
+  }
+}
+
+function updateWsDot(active) {
+  const dot = document.getElementById('ws-status-dot');
+  dot.classList.toggle('active', active);
+  dot.title = active ? 'Tracker initialized' : 'No tracker initialized';
+}
+
+document.getElementById('workspace-select').addEventListener('change', e => {
+  selectWorkspace(e.target.value);
+});
+
+document.getElementById('btn-init-workspace').addEventListener('click', initWorkspace);
+
+
+// ─── Stats Logic ──────────────────────────────────────────────────────────────
+
+function renderStats() {
+  const issues = state.issues;
+
+  const total      = issues.length;
+  const open       = issues.filter(i => i.status === 'open').length;
+  const inProgress = issues.filter(i => i.status === 'in_progress').length;
+  const done       = issues.filter(i => i.status === 'done').length;
+  const blocked    = issues.filter(i => Array.isArray(i.blockedBy) && i.blockedBy.length > 0).length;
+  const high       = issues.filter(i => i.priority === 'high').length;
+
+  document.getElementById('stat-total').textContent      = total;
+  document.getElementById('stat-open').textContent       = open;
+  document.getElementById('stat-in-progress').textContent = inProgress;
+  document.getElementById('stat-done').textContent       = done;
+  document.getElementById('stat-blocked').textContent    = blocked;
+  document.getElementById('stat-high').textContent       = high;
+}
+
+
+// ─── Filter Logic ─────────────────────────────────────────────────────────────
+
+function populateProjectFilter() {
+  const sel = document.getElementById('filter-project');
+  sel.innerHTML = '<option value="">All projects</option>';
+  state.projects.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = String(p.id);
+    opt.textContent = p.name;
+    sel.appendChild(opt);
+  });
+}
+
+function populateLabelFilter() {
+  const sel = document.getElementById('filter-label');
+  // Collect all unique labels from issues
+  const labelSet = new Set();
+  state.issues.forEach(i => {
+    (i.labels || []).forEach(l => labelSet.add(l));
+  });
+  sel.innerHTML = '<option value="">All labels</option>';
+  Array.from(labelSet).sort().forEach(label => {
+    const opt = document.createElement('option');
+    opt.value = label;
+    opt.textContent = label;
+    sel.appendChild(opt);
+  });
+}
+
+// Toggle button handler — multi-select within a group
+function handleToggleBtn(btn) {
+  const filterKey = btn.dataset.filter;   // 'status' or 'priority'
+  const value     = btn.dataset.value;
+
+  const filterSet = state.filters[filterKey];
+
+  if (value === 'all') {
+    filterSet.clear();
+    filterSet.add('all');
+  } else {
+    filterSet.delete('all');
+    if (filterSet.has(value)) {
+      filterSet.delete(value);
+      if (filterSet.size === 0) filterSet.add('all');
+    } else {
+      filterSet.add(value);
+    }
+  }
+
+  // Re-render toggle button active states
+  const group = document.querySelectorAll(`[data-filter="${filterKey}"]`);
+  group.forEach(b => {
+    b.classList.toggle('active', filterSet.has(b.dataset.value));
+  });
+
+  renderTable();
+}
+
+// Wire up toggle buttons
+document.querySelectorAll('.toggle-btn[data-filter]').forEach(btn => {
+  btn.addEventListener('click', () => handleToggleBtn(btn));
+});
+
+// Project filter
+document.getElementById('filter-project').addEventListener('change', e => {
+  state.filters.project = e.target.value;
+  renderTable();
+});
+
+// Label filter
+document.getElementById('filter-label').addEventListener('change', e => {
+  const selected = Array.from(e.target.selectedOptions).map(o => o.value).filter(Boolean);
+  state.filters.labels = new Set(selected);
+  renderTable();
+});
+
+// Search
+document.getElementById('search-input').addEventListener('input', e => {
+  state.filters.search = e.target.value.trim().toLowerCase();
+  renderTable();
+});
+
+// Hide voted
+document.getElementById('hide-voted').addEventListener('change', e => {
+  state.filters.hideVoted = e.target.checked;
+  renderTable();
+});
+
+// getFiltered — stub; full implementation in Task 7
+function getFiltered() {
+  let issues = state.issues;
+
+  // Status
+  if (!state.filters.status.has('all') && state.filters.status.size > 0) {
+    issues = issues.filter(i => state.filters.status.has(i.status));
+  }
+
+  // Priority
+  if (!state.filters.priority.has('all') && state.filters.priority.size > 0) {
+    issues = issues.filter(i => state.filters.priority.has(i.priority));
+  }
+
+  // Project
+  if (state.filters.project) {
+    issues = issues.filter(i => String(i.projectId) === state.filters.project);
+  }
+
+  // Labels
+  if (state.filters.labels.size > 0) {
+    issues = issues.filter(i =>
+      [...state.filters.labels].every(l => (i.labels || []).includes(l))
+    );
+  }
+
+  // Search
+  if (state.filters.search) {
+    const q = state.filters.search;
+    issues = issues.filter(i =>
+      (i.title || '').toLowerCase().includes(q) ||
+      (i.description || '').toLowerCase().includes(q) ||
+      String(i.id).includes(q)
+    );
+  }
+
+  // Hide voted
+  if (state.filters.hideVoted) {
+    issues = issues.filter(i => !i.userVote || i.userVote.verdict == null);
+  }
+
+  return issues;
+}
+
+
+// ─── Table Logic ──────────────────────────────────────────────────────────────
+
+// Stub — full row rendering implemented in Task 7
+function renderTable() {
+  const filtered = getFiltered();
+
+  document.getElementById('count-visible').textContent = filtered.length;
+  document.getElementById('count-total').textContent   = state.issues.length;
+
+  const tbody  = document.getElementById('issues-tbody');
+  const emptyEl = document.getElementById('empty-state');
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    emptyEl.style.display = 'flex';
+    return;
+  }
+
+  emptyEl.style.display = 'none';
+
+  // Basic stub rows — Task 7 will replace this with full rendering
+  tbody.innerHTML = filtered.map(issue => {
+    const statusClass = `badge-status-${issue.status}`;
+    const priorityClass = `badge-priority-${issue.priority}`;
+    const labels = (issue.labels || []).map(l =>
+      `<span class="badge badge-label">${escHtml(l)}</span>`
+    ).join(' ');
+
+    return `
+      <tr data-id="${issue.id}">
+        <td class="expand-col">▶</td>
+        <td style="font-family: var(--font-mono); color: var(--text-muted)">#${issue.id}</td>
+        <td>${escHtml(issue.title || '')}</td>
+        <td><span class="badge ${statusClass}">${formatStatus(issue.status)}</span></td>
+        <td><span class="badge ${priorityClass}">${capitalize(issue.priority)}</span></td>
+        <td><div class="labels-list">${labels}</div></td>
+        <td style="color: var(--text-muted)">${getProjectName(issue.projectId)}</td>
+        <td style="color: var(--text-muted)">${formatReviewSummary(issue.reviews)}</td>
+        <td style="color: var(--text-muted)">${formatVote(issue.userVote)}</td>
+        <td style="color: var(--text-muted); font-size: 12px">${formatDate(issue.updatedAt)}</td>
+      </tr>`;
+  }).join('');
+}
+
+
+// ─── Modal Logic ──────────────────────────────────────────────────────────────
+
+function openModal(overlayId) {
+  document.getElementById(overlayId).classList.add('open');
+}
+
+function closeModal(overlayId) {
+  document.getElementById(overlayId).classList.remove('open');
+}
+
+// Close buttons
+document.querySelectorAll('[data-close]').forEach(btn => {
+  btn.addEventListener('click', () => closeModal(btn.dataset.close));
+});
+
+// Close on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) closeModal(overlay.id);
+  });
+});
+
+// Escape key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(overlay => {
+      closeModal(overlay.id);
+    });
+  }
+});
+
+// Settings button (placeholder — Task 9)
+document.getElementById('btn-settings').addEventListener('click', () => {
+  openModal('modal-settings-overlay');
+});
+
+// New Issue button (placeholder — Task 7)
+document.getElementById('btn-new-issue').addEventListener('click', () => {
+  openModal('modal-issue-overlay');
+});
+
+
+// ─── Quick Wins Logic ─────────────────────────────────────────────────────────
+
+// Stub — full implementation in Task 8
+function renderQuickWins() {
+  // Will be implemented in Task 8
+}
+
+
+// ─── Utility Helpers ─────────────────────────────────────────────────────────
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function capitalize(str) {
+  if (!str) return '';
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function formatStatus(status) {
+  const map = { open: 'Open', in_progress: 'In Progress', done: 'Done', closed: 'Closed' };
+  return map[status] || status;
+}
+
+function getProjectName(projectId) {
+  if (!projectId) return '—';
+  const p = state.projects.find(p => p.id === projectId);
+  return p ? escHtml(p.name) : '—';
+}
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  try {
+    return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  } catch (_) {
+    return iso;
+  }
+}
+
+function formatReviewSummary(reviews) {
+  if (!reviews || typeof reviews !== 'object') return '—';
+  const entries = Object.values(reviews);
+  if (!entries.length) return '—';
+  const approved = entries.filter(r => r.verdict === 'approve').length;
+  const rejected = entries.filter(r => r.verdict === 'reject').length;
+  if (rejected > 0) return `<span style="color:var(--red)">${rejected} rejected</span>`;
+  if (approved === entries.length) return `<span style="color:var(--green)">${approved}/${entries.length} approved</span>`;
+  return `${approved}/${entries.length}`;
+}
+
+function formatVote(userVote) {
+  if (!userVote || userVote.verdict == null) return '—';
+  if (userVote.verdict === 'approve') return '<span style="color:var(--green)">Approved</span>';
+  if (userVote.verdict === 'reject')  return '<span style="color:var(--red)">Rejected</span>';
+  return userVote.verdict;
+}
+
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+
+async function init() {
+  await loadWorkspaces();
+}
+
+init();
+</script>
+</body>
+</html>
