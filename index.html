@@ -98,7 +98,7 @@
 
     #ws-status-dot.active { background: var(--green); }
 
-    select {
+    #workspace-select {
       background: transparent;
       border: none;
       color: var(--text);
@@ -109,7 +109,7 @@
       min-width: 160px;
     }
 
-    select option {
+    #workspace-select option {
       background: var(--bg-elevated);
       color: var(--text);
     }
@@ -165,7 +165,6 @@
       padding: 10px 14px;
       margin-bottom: 16px;
       font-size: 13px;
-      display: none;
       align-items: center;
       gap: 8px;
     }
@@ -460,6 +459,11 @@
       background: var(--bg-hover);
       cursor: pointer;
     }
+
+    /* Table cell helpers */
+    .col-id { font-family: var(--font-mono); color: var(--text-muted); }
+    .col-muted { color: var(--text-muted); }
+    .col-meta { color: var(--text-muted); font-size: 12px; }
 
     /* expand indicator */
     .expand-col {
@@ -831,20 +835,20 @@
       <!-- Status toggles -->
       <div class="filter-group">
         <span class="filter-group-label">Status</span>
-        <button class="toggle-btn active" data-filter="status" data-value="all">All</button>
-        <button class="toggle-btn status-open" data-filter="status" data-value="open">Open</button>
-        <button class="toggle-btn status-in_progress" data-filter="status" data-value="in_progress">In Progress</button>
-        <button class="toggle-btn status-done" data-filter="status" data-value="done">Done</button>
-        <button class="toggle-btn status-closed" data-filter="status" data-value="closed">Closed</button>
+        <button class="toggle-btn active" data-filter="status" data-value="all" aria-pressed="true">All</button>
+        <button class="toggle-btn status-open" data-filter="status" data-value="open" aria-pressed="false">Open</button>
+        <button class="toggle-btn status-in_progress" data-filter="status" data-value="in_progress" aria-pressed="false">In Progress</button>
+        <button class="toggle-btn status-done" data-filter="status" data-value="done" aria-pressed="false">Done</button>
+        <button class="toggle-btn status-closed" data-filter="status" data-value="closed" aria-pressed="false">Closed</button>
       </div>
 
       <!-- Priority toggles -->
       <div class="filter-group">
         <span class="filter-group-label">Priority</span>
-        <button class="toggle-btn active" data-filter="priority" data-value="all">All</button>
-        <button class="toggle-btn priority-high" data-filter="priority" data-value="high">High</button>
-        <button class="toggle-btn priority-medium" data-filter="priority" data-value="medium">Medium</button>
-        <button class="toggle-btn priority-low" data-filter="priority" data-value="low">Low</button>
+        <button class="toggle-btn active" data-filter="priority" data-value="all" aria-pressed="true">All</button>
+        <button class="toggle-btn priority-high" data-filter="priority" data-value="high" aria-pressed="false">High</button>
+        <button class="toggle-btn priority-medium" data-filter="priority" data-value="medium" aria-pressed="false">Medium</button>
+        <button class="toggle-btn priority-low" data-filter="priority" data-value="low" aria-pressed="false">Low</button>
       </div>
 
       <!-- Project filter -->
@@ -869,7 +873,7 @@
           <svg class="search-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
-          <input type="text" id="search-input" placeholder="Search issues…" autocomplete="off" />
+          <input type="text" id="search-input" placeholder="Search issues…" autocomplete="off" aria-label="Search issues" />
         </div>
       </div>
 
@@ -1235,7 +1239,9 @@ function handleToggleBtn(btn) {
   // Re-render toggle button active states
   const group = document.querySelectorAll(`[data-filter="${filterKey}"]`);
   group.forEach(b => {
-    b.classList.toggle('active', filterSet.has(b.dataset.value));
+    const isActive = filterSet.has(b.dataset.value);
+    b.classList.toggle('active', isActive);
+    b.setAttribute('aria-pressed', isActive);
   });
 
   renderTable();
@@ -1347,15 +1353,15 @@ function renderTable() {
     return `
       <tr data-id="${issue.id}">
         <td class="expand-col">▶</td>
-        <td style="font-family: var(--font-mono); color: var(--text-muted)">#${issue.id}</td>
+        <td class="col-id">#${issue.id}</td>
         <td>${escHtml(issue.title || '')}</td>
         <td><span class="badge ${statusClass}">${formatStatus(issue.status)}</span></td>
         <td><span class="badge ${priorityClass}">${capitalize(issue.priority)}</span></td>
         <td><div class="labels-list">${labels}</div></td>
-        <td style="color: var(--text-muted)">${getProjectName(issue.projectId)}</td>
-        <td style="color: var(--text-muted)">${formatReviewSummary(issue.reviews)}</td>
-        <td style="color: var(--text-muted)">${formatVote(issue.userVote)}</td>
-        <td style="color: var(--text-muted); font-size: 12px">${formatDate(issue.updatedAt)}</td>
+        <td class="col-muted">${getProjectName(issue.projectId)}</td>
+        <td class="col-muted">${formatReviewSummary(issue.reviews)}</td>
+        <td class="col-muted">${formatVote(issue.userVote)}</td>
+        <td class="col-meta">${formatDate(issue.updatedAt)}</td>
       </tr>`;
   }).join('');
 }
@@ -1418,7 +1424,8 @@ function escHtml(str) {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 function capitalize(str) {
@@ -1461,7 +1468,7 @@ function formatVote(userVote) {
   if (!userVote || userVote.verdict == null) return '—';
   if (userVote.verdict === 'approve') return '<span style="color:var(--green)">Approved</span>';
   if (userVote.verdict === 'reject')  return '<span style="color:var(--red)">Rejected</span>';
-  return userVote.verdict;
+  return escHtml(userVote.verdict);
 }
 
 
