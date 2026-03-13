@@ -41,6 +41,8 @@ issuetracker/
 ├── requirements.txt       # Python dependencies (fastapi, uvicorn)
 ├── tests/
 │   └── test_api.py        # Backend tests
+├── skill/
+│   └── issuetracker.md    # Claude Code skill definition
 ├── docs/
 │   └── superpowers/specs/ # Design specs
 └── .issuetracker/         # This project's own issue tracking data
@@ -307,3 +309,69 @@ Tests use FastAPI's `TestClient` with temporary directories as the root path, wi
 ### Frontend
 
 Manual verification — visual inspection that the UI renders correctly, filters work with multi-select, modals submit properly, and error banners display with recovery prompts. No e2e framework; this is a local dev tool.
+
+---
+
+## Claude Skill
+
+A Claude Code skill (`issuetracker`) that enables Claude to interact with `.issuetracker/` data directly via file read/write — no server required.
+
+### Skill Location
+
+The skill lives in the issuetracker repo and is installed as a local skill or via the project's CLAUDE.md.
+
+```
+issuetracker/
+├── skill/
+│   └── issuetracker.md    # Skill definition
+```
+
+### Capabilities
+
+The skill gives Claude full CRUD on issues and projects by reading/writing JSON files in the current project's `.issuetracker/` folder.
+
+**Issue operations:**
+- **List issues** — read all files in `.issuetracker/issues/`, with optional filtering by status, priority, label, project
+- **Get issue** — read a single `.issuetracker/issues/{id}.json`
+- **Create issue** — write a new JSON file, increment `nextIssueId` in `config.json`
+- **Update issue** — read, modify, write back an issue file (including status changes, adding blockers, updating reviews/votes)
+- **Delete issue** — remove the issue file, its `assets/{id}/` folder, and clean up `blockedBy` references in other issues
+
+**Project operations:**
+- **List/Get/Create/Update/Delete projects** — same pattern as issues, using `.issuetracker/projects/`
+
+**Query operations:**
+- **Show blocked issues** — list issues that have unresolved blockers
+- **Show dependencies for issue #{id}** — show what blocks it and what it blocks
+- **Show quick wins** — issues where all reviewers approved and priority is high or medium
+
+### Behavior
+
+- The skill detects the current project's `.issuetracker/` folder relative to the working directory
+- If `.issuetracker/` doesn't exist, the skill can initialize it (creates the scaffold with config.json, issues/, projects/, assets/)
+- All writes use the same atomic write pattern as the server (write to temp, rename)
+- Circular dependency prevention on updates
+- The skill respects the `reviewers` array in `config.json` when creating/updating reviews
+
+### Example Interactions
+
+```
+User: "Create an issue for the broken login validation"
+Claude: Creates .issuetracker/issues/004.json with title, sets status to open,
+        increments nextIssueId in config.json
+
+User: "What issues are blocking issue #5?"
+Claude: Reads issue 5, reads each issue in its blockedBy array, reports status
+
+User: "Mark issue #3 as done"
+Claude: Reads .issuetracker/issues/003.json, sets status to "done",
+        updates updatedAt timestamp
+
+User: "Close all issues in the Auth project"
+Claude: Reads project files to find the Auth project ID, reads all issues
+        with that projectId, updates each to status "closed"
+```
+
+### Automatic Behavior
+
+When Claude fixes a bug or implements a feature that corresponds to a tracked issue, it can proactively suggest updating the issue status. The skill does NOT auto-close issues without user confirmation.
