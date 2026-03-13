@@ -1,0 +1,6 @@
+{
+  "name": "Issue Tracker",
+  "nextIssueId": 1,
+  "nextProjectId": 1,
+  "reviewers": ["PM", "Dev Lead", "Security"]
+}
