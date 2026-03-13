@@ -59,7 +59,7 @@ def js_to_json(js: str) -> str:
 
     Handles:
     - // line comments
-    - unquoted object keys
+    - unquoted object keys (string-aware — won't corrupt values)
     - single-quoted strings
     - trailing commas before } or ]
     """
@@ -69,8 +69,8 @@ def js_to_json(js: str) -> str:
     # 2. Convert single-quoted strings to double-quoted
     js = _convert_single_quotes(js)
 
-    # 3. Quote unquoted keys:  word:  ->  "word":
-    js = re.sub(r'(?<!["\w])([a-zA-Z_][a-zA-Z0-9_]*)(\s*):', _quote_key, js)
+    # 3. Quote unquoted keys (string-aware)
+    js = _quote_unquoted_keys(js)
 
     # 4. Remove trailing commas before } or ]
     js = re.sub(r",(\s*[}\]])", r"\1", js)
@@ -161,12 +161,69 @@ def _convert_single_quotes(s: str) -> str:
     return "".join(result)
 
 
-def _quote_key(m: re.Match) -> str:
-    key = m.group(1)
-    spacing = m.group(2)
-    # Don't re-quote if it's a JSON keyword or already inside a string context
-    # (the regex already guards against starting after " or word char)
-    return f'"{key}"{spacing}:'
+def _quote_unquoted_keys(s: str) -> str:
+    """Quote unquoted object keys, respecting string literals.
+
+    Walks character by character. Inside strings, copies verbatim.
+    Outside strings, finds patterns like `word:` and wraps in quotes.
+    """
+    result = []
+    i = 0
+    length = len(s)
+    while i < length:
+        ch = s[i]
+        # Skip over double-quoted strings
+        if ch == '"':
+            result.append(ch)
+            i += 1
+            while i < length:
+                c = s[i]
+                result.append(c)
+                if c == '\\' and i + 1 < length:
+                    i += 1
+                    result.append(s[i])
+                elif c == '"':
+                    break
+                i += 1
+            i += 1
+            continue
+
+        # Outside strings: look for unquoted key pattern
+        # An unquoted key is a word char sequence followed by optional whitespace and ':'
+        # preceded by { or , or start-of-line whitespace (not inside a value)
+        if ch.isalpha() or ch == '_':
+            # Peek back to see if this could be a key (after { , or newline)
+            prev_non_ws = ''
+            j = len(result) - 1
+            while j >= 0 and result[j] in (' ', '\t', '\n', '\r'):
+                j -= 1
+            if j >= 0:
+                prev_non_ws = result[j]
+
+            if prev_non_ws in ('{', ',', '[', '') or prev_non_ws == '':
+                # Collect the word
+                word_start = i
+                while i < length and (s[i].isalnum() or s[i] == '_'):
+                    i += 1
+                word = s[word_start:i]
+                # Skip whitespace
+                ws = ''
+                while i < length and s[i] in (' ', '\t'):
+                    ws += s[i]
+                    i += 1
+                # Check if followed by ':'
+                if i < length and s[i] == ':':
+                    result.append(f'"{word}"{ws}:')
+                    i += 1  # skip the ':'
+                    continue
+                else:
+                    # Not a key, just a word — output as-is
+                    result.append(word)
+                    result.append(ws)
+                    continue
+        result.append(ch)
+        i += 1
+    return ''.join(result)
 
 
 # ---------------------------------------------------------------------------
