@@ -116,6 +116,9 @@ The `reviewers` array drives the UI dynamically — adding a new persona here au
 - `priority` — one of: `high`, `medium`, `low`
 - `labels` — freeform string array
 - `projectId` — references a project in `projects/`, nullable
+- `cycle` — positive integer, nullable. Represents a review or development cycle number.
+- `personas` — freeform string array. User personas affected by this issue (e.g., `["new-user", "power-user"]`).
+- `files` — freeform string array. Source-code file paths related to this issue (not references to the `assets/` folder; assets are managed separately via the `assets/{id}/` directory).
 - `blockedBy` — array of issue IDs that must be completed before this one can start
 - `reviews` — keyed by reviewer persona name, dynamically driven by `config.json` reviewers array
 - `userVote.verdict` — one of: `approve`, `defer`, `reject`, or `null`
@@ -163,8 +166,8 @@ FastAPI server, single `server.py` file.
 | `GET` | `/api/workspaces/{name}/issues/{id}` | Get single issue |
 | `PUT` | `/api/workspaces/{name}/issues/{id}` | Update issue |
 | `DELETE` | `/api/workspaces/{name}/issues/{id}` | Delete issue + its assets folder |
-| `PUT` | `/api/workspaces/{name}/issues/{id}/vote` | Update user vote |
-| `PUT` | `/api/workspaces/{name}/issues/{id}/reviews` | Update reviewer verdicts |
+| `PUT` | `/api/workspaces/{name}/issues/{id}/vote` | Update user vote (body: `{ "verdict": "approve", "notes": "..." }`) |
+| `PUT` | `/api/workspaces/{name}/issues/{id}/reviews` | Merge a single reviewer verdict (body: `{ "reviewer": "PM", "verdict": "approve", "notes": "..." }` — merges into the `reviews` object, does not replace other reviewers) |
 
 ### Projects
 
@@ -229,7 +232,7 @@ Single `index.html` with embedded CSS and JS. Dark GitHub-style theme matching t
 - Delete with confirmation dialog
 
 **Quick Wins section:**
-- Carried over from current tracker — issues that are high-value, low-effort based on reviewer verdicts
+- Carried over from current tracker — issues where all reviewers have verdict `approve` and priority is `high` or `medium`. This is the heuristic for "high-value, low-effort" — unanimous reviewer approval signals low risk/effort, and priority signals value.
 
 ---
 
@@ -298,6 +301,8 @@ Tests use FastAPI's `TestClient` with temporary directories as the root path, wi
 - Root path validation (missing, invalid)
 - Config read/write (root path override)
 - Multi-filter query parameter combinations
+- Vote endpoint (PUT .../vote) creates and updates user votes correctly
+- Review endpoint (PUT .../reviews) merges single reviewer verdict without overwriting others
 
 ### Frontend
 
