@@ -103,6 +103,21 @@ def create_app(root_path: Path | None = None) -> FastAPI:
         config = data.init_workspace(ws, name)
         return config
 
+    @app.get("/api/workspaces/{name}/config")
+    def get_workspace_config(name: str):
+        ws = _resolve_workspace(name)
+        _require_tracker(ws)
+        return data.read_config(ws)
+
+    @app.put("/api/workspaces/{name}/config")
+    def put_workspace_config(name: str, body: dict):
+        ws = _resolve_workspace(name)
+        _require_tracker(ws)
+        config = data.read_config(ws)
+        config.update(body)
+        data.write_config(ws, config)
+        return config
+
     # ------------------------------------------------------------------
     # Issue endpoints
     # ------------------------------------------------------------------
@@ -174,7 +189,12 @@ def create_app(root_path: Path | None = None) -> FastAPI:
         issue = data.get_issue(ws, issue_id)
         if issue is None:
             raise HTTPException(status_code=404, detail=f"Issue {issue_id} not found")
-        issue = data.update_issue(ws, issue_id, {"userVote": body.get("userVote")})
+        # Accept either {"verdict":..,"notes":..} or {"userVote":{..}}
+        if "userVote" in body:
+            user_vote = body["userVote"]
+        else:
+            user_vote = {"verdict": body.get("verdict"), "notes": body.get("notes", "")}
+        issue = data.update_issue(ws, issue_id, {"userVote": user_vote})
         return issue
 
     @app.put("/api/workspaces/{name}/issues/{issue_id}/reviews")

@@ -742,6 +742,189 @@
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    /* ─── Expanded Row Detail ─── */
+    .expand-row td {
+      padding: 0 !important;
+      background: var(--bg-elevated) !important;
+      cursor: default !important;
+    }
+    .expand-row:hover td { background: var(--bg-elevated) !important; }
+    .expand-row-inner {
+      padding: 16px 20px 16px 48px;
+      border-top: 1px solid var(--border);
+    }
+    .expand-section {
+      margin-bottom: 14px;
+    }
+    .expand-section:last-child { margin-bottom: 0; }
+    .expand-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .reviewer-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .reviewer-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 12px;
+      min-width: 140px;
+      max-width: 240px;
+    }
+    .reviewer-card-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+    .reviewer-card-notes {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-style: italic;
+    }
+    .verdict-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+    }
+    .verdict-approve { background: rgba(63,185,80,0.15);   color: var(--green); border: 1px solid rgba(63,185,80,0.3); }
+    .verdict-defer   { background: rgba(210,153,34,0.15);  color: var(--amber); border: 1px solid rgba(210,153,34,0.3); }
+    .verdict-reject  { background: rgba(248,81,73,0.15);   color: var(--red);   border: 1px solid rgba(248,81,73,0.3); }
+    .verdict-null    { background: rgba(110,118,129,0.15); color: var(--gray);  border: 1px solid rgba(110,118,129,0.3); }
+
+    /* Vote card */
+    .vote-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      display: inline-flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 280px;
+    }
+    .vote-btn-group {
+      display: flex;
+      gap: 6px;
+    }
+    .vote-btn {
+      padding: 4px 12px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .vote-btn:hover { color: var(--text); border-color: var(--text-muted); }
+    .vote-btn.vote-btn-approve { }
+    .vote-btn.vote-btn-approve.selected { background: rgba(63,185,80,0.15); color: var(--green); border-color: rgba(63,185,80,0.5); }
+    .vote-btn.vote-btn-defer.selected   { background: rgba(210,153,34,0.15); color: var(--amber); border-color: rgba(210,153,34,0.5); }
+    .vote-btn.vote-btn-reject.selected  { background: rgba(248,81,73,0.15); color: var(--red); border-color: rgba(248,81,73,0.5); }
+    .vote-notes {
+      width: 100%;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 12px;
+      font-family: var(--font-mono);
+      padding: 5px 8px;
+      resize: vertical;
+      min-height: 50px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .vote-notes:focus { border-color: var(--accent); }
+    .vote-save-btn {
+      align-self: flex-start;
+      padding: 4px 12px;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .vote-save-btn:hover { opacity: 0.85; }
+    .vote-saving { opacity: 0.6; pointer-events: none; }
+
+    /* Chips */
+    .chip-list { display: flex; flex-wrap: wrap; gap: 5px; }
+    .chip {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2px 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+    .chip.chip-persona {
+      border-radius: 20px;
+      background: rgba(88,166,255,0.08);
+      border-color: rgba(88,166,255,0.25);
+      color: var(--accent);
+    }
+    .blocker-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .blocker-open   { background: rgba(248,81,73,0.15); color: var(--red); border: 1px solid rgba(248,81,73,0.3); }
+    .blocker-resolved { background: rgba(63,185,80,0.15); color: var(--green); border: 1px solid rgba(63,185,80,0.3); }
+    .blocker-badge:hover { opacity: 0.8; }
+
+    /* Expand indicator rotation */
+    tr.expanded .expand-indicator { transform: rotate(90deg); }
+    .expand-indicator {
+      display: inline-block;
+      transition: transform 0.15s;
+      color: var(--text-muted);
+      font-size: 10px;
+    }
+
+    /* Highlighted row (from blocker badge click) */
+    tr.row-highlight td {
+      background: rgba(88,166,255,0.07) !important;
+      transition: background 0.5s;
+    }
+
+    /* Sort indicators on th */
+    #issues-table th .sort-icon {
+      margin-left: 4px;
+      font-size: 10px;
+      color: var(--accent);
+    }
+    #issues-table th[data-sort] { cursor: pointer; }
+    #issues-table th[data-sort]:hover { color: var(--text); }
   </style>
 </head>
 <body>
@@ -985,6 +1168,7 @@ const state = {
   currentWorkspace: null, // string name
   issues: [],             // raw issues from API
   projects: [],           // raw projects from API
+  config: null,           // workspace config (includes reviewers array)
 
   // Active filter sets — multi-select
   filters: {
@@ -996,7 +1180,7 @@ const state = {
     hideVoted: false,
   },
 
-  // Sort state (used by Task 7)
+  // Sort state
   sort: {
     col: 'id',
     dir: 'desc',
@@ -1038,6 +1222,8 @@ const api = {
   deleteProject:    (name, id)     => apiFetch(`/api/workspaces/${encodeURIComponent(name)}/projects/${id}`, { method: 'DELETE' }),
   getConfig:        ()             => apiFetch('/api/config'),
   putConfig:        (body)         => apiFetch('/api/config', { method: 'PUT', body: JSON.stringify(body) }),
+  getWorkspaceConfig: (name)       => apiFetch(`/api/workspaces/${encodeURIComponent(name)}/config`),
+  putWorkspaceConfig: (name, body) => apiFetch(`/api/workspaces/${encodeURIComponent(name)}/config`, { method: 'PUT', body: JSON.stringify(body) }),
 };
 
 
@@ -1116,12 +1302,14 @@ async function selectWorkspace(name) {
 
   try {
     hideError();
-    const [issueRes, projectRes] = await Promise.all([
+    const [issueRes, projectRes, configRes] = await Promise.all([
       api.getIssues(name),
       api.getProjects(name),
+      api.getWorkspaceConfig(name),
     ]);
     state.issues   = issueRes.issues   || [];
     state.projects = projectRes.projects || [];
+    state.config   = configRes || {};
 
     if (issueRes.warnings && issueRes.warnings.length) {
       showError('Warnings: ' + issueRes.warnings.join('; '));
@@ -1265,10 +1453,14 @@ document.getElementById('filter-label').addEventListener('change', e => {
   renderTable();
 });
 
-// Search
+// Search (debounced 150ms)
+let _searchDebounce = null;
 document.getElementById('search-input').addEventListener('input', e => {
-  state.filters.search = e.target.value.trim().toLowerCase();
-  renderTable();
+  clearTimeout(_searchDebounce);
+  _searchDebounce = setTimeout(() => {
+    state.filters.search = e.target.value.trim().toLowerCase();
+    renderTable();
+  }, 150);
 });
 
 // Hide voted
@@ -1277,7 +1469,6 @@ document.getElementById('hide-voted').addEventListener('change', e => {
   renderTable();
 });
 
-// getFiltered — stub; full implementation in Task 7
 function getFiltered() {
   let issues = state.issues;
 
@@ -1318,21 +1509,66 @@ function getFiltered() {
     issues = issues.filter(i => !i.userVote || i.userVote.verdict == null);
   }
 
+  // Sort
+  const { col, dir } = state.sort;
+  if (col) {
+    issues = [...issues].sort((a, b) => {
+      let av, bv;
+      if (col === 'id') {
+        av = a.id; bv = b.id;
+      } else if (col === 'title') {
+        av = (a.title || '').toLowerCase(); bv = (b.title || '').toLowerCase();
+      } else if (col === 'status') {
+        const order = { open: 0, in_progress: 1, done: 2, closed: 3 };
+        av = order[a.status] ?? 99; bv = order[b.status] ?? 99;
+      } else if (col === 'priority') {
+        const order = { high: 0, medium: 1, low: 2 };
+        av = order[a.priority] ?? 99; bv = order[b.priority] ?? 99;
+      } else if (col === 'projectId') {
+        av = getProjectName(a.projectId).toLowerCase();
+        bv = getProjectName(b.projectId).toLowerCase();
+      } else if (col === 'updatedAt') {
+        av = a.updatedAt || ''; bv = b.updatedAt || '';
+      } else {
+        av = a[col]; bv = b[col];
+      }
+      if (av < bv) return dir === 'asc' ? -1 : 1;
+      if (av > bv) return dir === 'asc' ?  1 : -1;
+      return 0;
+    });
+  }
+
   return issues;
 }
 
 
 // ─── Table Logic ──────────────────────────────────────────────────────────────
 
-// Stub — full row rendering implemented in Task 7
+// Track which row IDs are currently expanded
+const expandedRows = new Set();
+
 function renderTable() {
   const filtered = getFiltered();
 
   document.getElementById('count-visible').textContent = filtered.length;
   document.getElementById('count-total').textContent   = state.issues.length;
 
-  const tbody  = document.getElementById('issues-tbody');
+  const tbody   = document.getElementById('issues-tbody');
   const emptyEl = document.getElementById('empty-state');
+
+  // Update sort indicators on headers
+  document.querySelectorAll('#issues-table th[data-sort]').forEach(th => {
+    th.classList.remove('sorted');
+    const icon = th.querySelector('.sort-icon');
+    if (icon) icon.remove();
+    if (th.dataset.sort === state.sort.col) {
+      th.classList.add('sorted');
+      const span = document.createElement('span');
+      span.className = 'sort-icon';
+      span.textContent = state.sort.dir === 'asc' ? ' ↑' : ' ↓';
+      th.appendChild(span);
+    }
+  });
 
   if (filtered.length === 0) {
     tbody.innerHTML = '';
@@ -1342,17 +1578,20 @@ function renderTable() {
 
   emptyEl.style.display = 'none';
 
-  // Basic stub rows — Task 7 will replace this with full rendering
-  tbody.innerHTML = filtered.map(issue => {
-    const statusClass = `badge-status-${issue.status}`;
+  const rows = [];
+  filtered.forEach(issue => {
+    const statusClass   = `badge-status-${issue.status}`;
     const priorityClass = `badge-priority-${issue.priority}`;
     const labels = (issue.labels || []).map(l =>
       `<span class="badge badge-label">${escHtml(l)}</span>`
     ).join(' ');
 
-    return `
-      <tr data-id="${issue.id}">
-        <td class="expand-col">▶</td>
+    const isExpanded = expandedRows.has(issue.id);
+    const expandedClass = isExpanded ? ' expanded' : '';
+
+    rows.push(`
+      <tr data-id="${issue.id}" class="issue-row${expandedClass}" style="cursor:pointer">
+        <td class="expand-col"><span class="expand-indicator">▶</span></td>
         <td class="col-id">#${issue.id}</td>
         <td>${escHtml(issue.title || '')}</td>
         <td><span class="badge ${statusClass}">${formatStatus(issue.status)}</span></td>
@@ -1362,9 +1601,238 @@ function renderTable() {
         <td class="col-muted">${formatReviewSummary(issue.reviews)}</td>
         <td class="col-muted">${formatVote(issue.userVote)}</td>
         <td class="col-meta">${formatDate(issue.updatedAt)}</td>
-      </tr>`;
-  }).join('');
+      </tr>`);
+
+    if (isExpanded) {
+      rows.push(buildExpandedRowHtml(issue));
+    }
+  });
+
+  tbody.innerHTML = rows.join('');
+
+  // Attach row click handlers
+  tbody.querySelectorAll('tr.issue-row').forEach(tr => {
+    tr.addEventListener('click', () => toggleExpandRow(Number(tr.dataset.id)));
+  });
+
+  // Attach vote-save handlers (for already-expanded rows after re-render)
+  tbody.querySelectorAll('.vote-save-btn').forEach(btn => {
+    btn.addEventListener('click', handleVoteSave);
+  });
+
+  // Attach vote-button-select handlers
+  tbody.querySelectorAll('.vote-btn').forEach(btn => {
+    btn.addEventListener('click', handleVoteBtnClick);
+  });
+
+  // Attach blocker badge click handlers
+  tbody.querySelectorAll('.blocker-badge').forEach(badge => {
+    badge.addEventListener('click', e => {
+      e.stopPropagation();
+      const targetId = Number(badge.dataset.targetId);
+      scrollToIssueRow(targetId);
+    });
+  });
 }
+
+function toggleExpandRow(issueId) {
+  if (expandedRows.has(issueId)) {
+    expandedRows.delete(issueId);
+  } else {
+    expandedRows.add(issueId);
+  }
+  renderTable();
+}
+
+function buildExpandedRowHtml(issue) {
+  const colSpan = 10;
+  const sections = [];
+
+  // Description
+  if (issue.description) {
+    sections.push(`
+      <div class="expand-section">
+        <div class="expand-section-label">Description</div>
+        <div style="font-size:13px;color:var(--text);white-space:pre-wrap">${escHtml(issue.description)}</div>
+      </div>`);
+  }
+
+  // Reviewer cards
+  const reviewers = (state.config && state.config.reviewers) ? state.config.reviewers : [];
+  const reviews = issue.reviews || {};
+  if (reviewers.length > 0 || Object.keys(reviews).length > 0) {
+    // Merge: config reviewers + any extra in reviews
+    const allReviewers = [...new Set([...reviewers, ...Object.keys(reviews)])];
+    const cards = allReviewers.map(name => {
+      const r = reviews[name] || {};
+      const verdict = r.verdict || null;
+      const vClass = verdict ? `verdict-${verdict}` : 'verdict-null';
+      const vLabel = verdict ? capitalize(verdict) : 'Pending';
+      const notes = r.notes ? `<div class="reviewer-card-notes">${escHtml(r.notes)}</div>` : '';
+      return `
+        <div class="reviewer-card">
+          <div class="reviewer-card-name">${escHtml(name)}</div>
+          <span class="verdict-badge ${vClass}">${escHtml(vLabel)}</span>
+          ${notes}
+        </div>`;
+    }).join('');
+    sections.push(`
+      <div class="expand-section">
+        <div class="expand-section-label">Reviewer Verdicts</div>
+        <div class="reviewer-cards">${cards}</div>
+      </div>`);
+  }
+
+  // Your vote
+  const vote = issue.userVote || {};
+  const currentVerdict = vote.verdict || '';
+  const currentNotes   = escHtml(vote.notes || '');
+  const approveSelected = currentVerdict === 'approve' ? ' selected' : '';
+  const deferSelected   = currentVerdict === 'defer'   ? ' selected' : '';
+  const rejectSelected  = currentVerdict === 'reject'  ? ' selected' : '';
+  sections.push(`
+    <div class="expand-section">
+      <div class="expand-section-label">Your Vote</div>
+      <div class="vote-card" data-issue-id="${issue.id}">
+        <div class="vote-btn-group">
+          <button class="vote-btn vote-btn-approve${approveSelected}" data-verdict="approve">Approve</button>
+          <button class="vote-btn vote-btn-defer${deferSelected}"     data-verdict="defer">Defer</button>
+          <button class="vote-btn vote-btn-reject${rejectSelected}"   data-verdict="reject">Reject</button>
+        </div>
+        <textarea class="vote-notes" placeholder="Optional notes…">${currentNotes}</textarea>
+        <button class="vote-save-btn" data-issue-id="${issue.id}">Save Vote</button>
+      </div>
+    </div>`);
+
+  // Blocked by
+  if (Array.isArray(issue.blockedBy) && issue.blockedBy.length > 0) {
+    const badges = issue.blockedBy.map(blockerId => {
+      const blocker = state.issues.find(i => i.id === blockerId);
+      const resolved = blocker && (blocker.status === 'done' || blocker.status === 'closed');
+      const cls = resolved ? 'blocker-resolved' : 'blocker-open';
+      const title = blocker ? escHtml(blocker.title) : 'unknown';
+      return `<span class="blocker-badge ${cls}" data-target-id="${blockerId}" title="${title}">#${blockerId}</span>`;
+    }).join('');
+    sections.push(`
+      <div class="expand-section">
+        <div class="expand-section-label">Blocked By</div>
+        <div class="chip-list">${badges}</div>
+      </div>`);
+  }
+
+  // Files
+  if (Array.isArray(issue.files) && issue.files.length > 0) {
+    const chips = issue.files.map(f => `<span class="chip">${escHtml(f)}</span>`).join('');
+    sections.push(`
+      <div class="expand-section">
+        <div class="expand-section-label">Files</div>
+        <div class="chip-list">${chips}</div>
+      </div>`);
+  }
+
+  // Personas
+  if (Array.isArray(issue.personas) && issue.personas.length > 0) {
+    const chips = issue.personas.map(p => `<span class="chip chip-persona">${escHtml(p)}</span>`).join('');
+    sections.push(`
+      <div class="expand-section">
+        <div class="expand-section-label">Personas</div>
+        <div class="chip-list">${chips}</div>
+      </div>`);
+  }
+
+  // Meta
+  const metaParts = [];
+  if (issue.cycle != null) metaParts.push(`<span>Cycle <strong>${escHtml(String(issue.cycle))}</strong></span>`);
+  if (issue.createdAt)     metaParts.push(`<span>Created <strong>${formatDate(issue.createdAt)}</strong></span>`);
+  if (issue.updatedAt)     metaParts.push(`<span>Updated <strong>${formatDate(issue.updatedAt)}</strong></span>`);
+  if (metaParts.length) {
+    sections.push(`
+      <div class="expand-section">
+        <div class="expand-section-label">Meta</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--text-muted)">${metaParts.join('')}</div>
+      </div>`);
+  }
+
+  return `
+    <tr class="expand-row" data-expand-for="${issue.id}">
+      <td colspan="${colSpan}">
+        <div class="expand-row-inner">${sections.join('')}</div>
+      </td>
+    </tr>`;
+}
+
+function handleVoteBtnClick(e) {
+  e.stopPropagation();
+  const btn = e.currentTarget;
+  const card = btn.closest('.vote-card');
+  if (!card) return;
+  // Toggle selection within the group
+  card.querySelectorAll('.vote-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+async function handleVoteSave(e) {
+  e.stopPropagation();
+  const btn = e.currentTarget;
+  const issueId = Number(btn.dataset.issueId);
+  const card = btn.closest('.vote-card');
+  if (!card) return;
+
+  const selectedBtn = card.querySelector('.vote-btn.selected');
+  const verdict = selectedBtn ? selectedBtn.dataset.verdict : null;
+  const notes   = card.querySelector('.vote-notes').value.trim();
+
+  if (!state.currentWorkspace) return;
+
+  btn.classList.add('vote-saving');
+  btn.textContent = 'Saving…';
+
+  try {
+    const updated = await api.updateVote(state.currentWorkspace, issueId, { verdict, notes });
+    // Update issue in state
+    const idx = state.issues.findIndex(i => i.id === issueId);
+    if (idx !== -1) state.issues[idx] = updated;
+    renderStats();
+    renderTable();
+  } catch (err) {
+    showError('Failed to save vote: ' + err.message);
+    btn.classList.remove('vote-saving');
+    btn.textContent = 'Save Vote';
+  }
+}
+
+function scrollToIssueRow(issueId) {
+  // Expand the target row if not already expanded
+  if (!expandedRows.has(issueId)) {
+    expandedRows.add(issueId);
+    renderTable();
+  }
+  const tr = document.querySelector(`tr.issue-row[data-id="${issueId}"]`);
+  if (tr) {
+    tr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    tr.classList.add('row-highlight');
+    setTimeout(() => tr.classList.remove('row-highlight'), 1800);
+  }
+}
+
+// Sortable column headers
+document.getElementById('issues-table').querySelector('thead').addEventListener('click', e => {
+  const th = e.target.closest('th[data-sort]');
+  if (!th) return;
+  const col = th.dataset.sort;
+  if (state.sort.col === col) {
+    if (state.sort.dir === 'asc') {
+      state.sort.dir = 'desc';
+    } else if (state.sort.dir === 'desc') {
+      state.sort.col = null;
+      state.sort.dir = 'asc';
+    }
+  } else {
+    state.sort.col = col;
+    state.sort.dir = 'asc';
+  }
+  renderTable();
+});
 
 
 // ─── Modal Logic ──────────────────────────────────────────────────────────────
