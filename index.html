@@ -162,15 +162,21 @@
       border: 1px solid var(--red);
       border-radius: var(--radius);
       color: var(--red);
-      padding: 10px 14px;
+      padding: 12px 14px;
       margin-bottom: 16px;
       font-size: 13px;
-      align-items: center;
-      gap: 8px;
+      flex-direction: column;
+      gap: 10px;
     }
 
     #error-banner.visible {
       display: flex;
+    }
+
+    #error-banner-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     #error-banner-close {
@@ -182,6 +188,124 @@
       font-size: 16px;
       line-height: 1;
       padding: 0 2px;
+    }
+
+    #error-banner-prompts {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .error-prompt-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      background: rgba(248, 81, 73, 0.08);
+      border: 1px solid rgba(248, 81, 73, 0.25);
+      border-radius: var(--radius);
+      padding: 8px 10px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .error-prompt-text {
+      flex: 1;
+      font-family: var(--font-mono);
+      word-break: break-word;
+      line-height: 1.5;
+      color: var(--text);
+      font-size: 11px;
+    }
+
+    .error-prompt-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--red);
+      white-space: nowrap;
+      padding-top: 2px;
+    }
+
+    .btn-copy-prompt {
+      background: none;
+      border: 1px solid rgba(248, 81, 73, 0.4);
+      border-radius: var(--radius);
+      color: var(--red);
+      cursor: pointer;
+      font-size: 11px;
+      font-family: inherit;
+      padding: 3px 8px;
+      white-space: nowrap;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+
+    .btn-copy-prompt:hover {
+      background: rgba(248, 81, 73, 0.12);
+    }
+
+    .btn-copy-prompt.copied {
+      color: var(--green);
+      border-color: rgba(63, 185, 80, 0.4);
+    }
+
+    /* ─── Quick Wins Cards ─── */
+    #quick-wins-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .qw-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      min-width: 220px;
+      max-width: 320px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .qw-card:hover {
+      border-color: var(--accent);
+      background: var(--bg-hover);
+    }
+
+    .qw-card-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .qw-card-id {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .qw-card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .qw-card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .qw-card-project {
+      font-size: 11px;
+      color: var(--text-muted);
     }
 
     /* ─── Stats Grid ─── */
@@ -1152,9 +1276,12 @@
 
   <!-- Error Banner -->
   <div id="error-banner" role="alert">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    <span id="error-banner-text"></span>
-    <button id="error-banner-close" aria-label="Dismiss">&times;</button>
+    <div id="error-banner-header">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="error-banner-text"></span>
+      <button id="error-banner-close" aria-label="Dismiss">&times;</button>
+    </div>
+    <div id="error-banner-prompts"></div>
   </div>
 
   <!-- No Workspace State -->
@@ -1460,10 +1587,19 @@
       <button class="modal-close" data-close="modal-settings-overlay">&times;</button>
     </div>
     <div class="modal-body" id="modal-settings-body">
-      <!-- populated in Task 9 -->
+      <div class="form-group">
+        <label for="settings-root-path">Projects Root Path</label>
+        <input type="text" id="settings-root-path" class="form-control" placeholder="/path/to/projects" />
+        <div style="font-size:11px;color:var(--text-muted);margin-top:5px;">
+          The directory scanned for workspace subdirectories.
+        </div>
+      </div>
+      <div id="settings-error" style="display:none;color:var(--red);font-size:12px;margin-top:6px;"></div>
+      <div id="settings-success" style="display:none;color:var(--green);font-size:12px;margin-top:6px;"></div>
     </div>
     <div class="modal-footer">
-      <button class="btn-ghost" data-close="modal-settings-overlay">Close</button>
+      <button class="btn-ghost" data-close="modal-settings-overlay">Cancel</button>
+      <button class="btn-primary" id="btn-save-settings">Save Settings</button>
     </div>
   </div>
 </div>
@@ -1539,14 +1675,54 @@ const api = {
 
 // ─── Error Handling ───────────────────────────────────────────────────────────
 
-function showError(msg) {
-  const banner = document.getElementById('error-banner');
-  document.getElementById('error-banner-text').textContent = msg;
+/**
+ * showError(msg, prompts?)
+ * prompts: array of { label: string, text: string }
+ * Each prompt gets a "Copy prompt" button.
+ */
+function showError(msg, prompts) {
+  const banner      = document.getElementById('error-banner');
+  const textEl      = document.getElementById('error-banner-text');
+  const promptsEl   = document.getElementById('error-banner-prompts');
+
+  textEl.textContent = msg;
+
+  promptsEl.innerHTML = '';
+  if (Array.isArray(prompts) && prompts.length > 0) {
+    prompts.forEach(({ label, text }) => {
+      const item = document.createElement('div');
+      item.className = 'error-prompt-item';
+      item.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:4px;flex:1">
+          <span class="error-prompt-label">${escHtml(label)}</span>
+          <span class="error-prompt-text">${escHtml(text)}</span>
+        </div>
+        <button class="btn-copy-prompt" type="button">Copy prompt</button>`;
+      const copyBtn = item.querySelector('.btn-copy-prompt');
+      copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(text).then(() => {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+          setTimeout(() => {
+            copyBtn.textContent = 'Copy prompt';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        }).catch(() => {
+          // Fallback: select text
+          copyBtn.textContent = 'Failed';
+          setTimeout(() => { copyBtn.textContent = 'Copy prompt'; }, 2000);
+        });
+      });
+      promptsEl.appendChild(item);
+    });
+  }
+
   banner.classList.add('visible');
 }
 
 function hideError() {
   document.getElementById('error-banner').classList.remove('visible');
+  document.getElementById('error-banner-prompts').innerHTML = '';
 }
 
 document.getElementById('error-banner-close').addEventListener('click', hideError);
@@ -1622,13 +1798,15 @@ async function selectWorkspace(name) {
     state.config   = configRes || {};
 
     if (issueRes.warnings && issueRes.warnings.length) {
-      showError('Warnings: ' + issueRes.warnings.join('; '));
+      handleIssueWarnings(issueRes.warnings, name);
     }
 
     renderStats();
     populateProjectFilter();
     populateLabelFilter();
     renderTable();
+    renderQuickWins();
+    checkMissingProjects();
 
     document.getElementById('no-workspace-state').style.display = 'none';
     document.getElementById('workspace-content').style.display = '';
@@ -2207,9 +2385,70 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// Settings button (placeholder — Task 9)
-document.getElementById('btn-settings').addEventListener('click', () => {
+// ─── Settings Modal ───────────────────────────────────────────────────────────
+
+async function openSettingsModal() {
+  const errorEl   = document.getElementById('settings-error');
+  const successEl = document.getElementById('settings-success');
+  errorEl.style.display   = 'none';
+  successEl.style.display = 'none';
+
+  try {
+    const cfg = await api.getConfig();
+    document.getElementById('settings-root-path').value = cfg.rootPath || '';
+  } catch (err) {
+    document.getElementById('settings-root-path').value = '';
+    errorEl.textContent = 'Could not load current config: ' + err.message;
+    errorEl.style.display = '';
+  }
   openModal('modal-settings-overlay');
+}
+
+document.getElementById('btn-settings').addEventListener('click', openSettingsModal);
+
+document.getElementById('btn-save-settings').addEventListener('click', async () => {
+  const rootPath  = document.getElementById('settings-root-path').value.trim();
+  const errorEl   = document.getElementById('settings-error');
+  const successEl = document.getElementById('settings-success');
+  const btn       = document.getElementById('btn-save-settings');
+
+  errorEl.style.display   = 'none';
+  successEl.style.display = 'none';
+
+  if (!rootPath) {
+    errorEl.textContent    = 'Root path cannot be empty.';
+    errorEl.style.display  = '';
+    return;
+  }
+
+  btn.disabled    = true;
+  btn.textContent = 'Saving…';
+
+  try {
+    await api.putConfig({ rootPath });
+    successEl.textContent    = 'Settings saved. Reloading workspaces…';
+    successEl.style.display  = '';
+    // Reload workspaces with the new root
+    await loadWorkspaces();
+    setTimeout(() => closeModal('modal-settings-overlay'), 800);
+  } catch (err) {
+    const msg = err.message || 'Unknown error';
+    errorEl.textContent   = 'Failed to save: ' + msg;
+    errorEl.style.display = '';
+
+    // Scenario 5: root path does not exist
+    if (msg.toLowerCase().includes('not exist') || msg.toLowerCase().includes('no such') || msg.toLowerCase().includes('invalid')) {
+      showError('Root path does not exist: ' + rootPath, [
+        {
+          label: 'Fix: update or create path',
+          text: `The configured projects root \`${rootPath}\` does not exist. Update the root path in Issue Tracker settings or create the directory`,
+        },
+      ]);
+    }
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = 'Save Settings';
+  }
 });
 
 // New Issue button
@@ -2598,6 +2837,7 @@ async function refreshIssues() {
     renderStats();
     populateLabelFilter();
     renderTable();
+    renderQuickWins();
   } catch (err) {
     showError('Failed to refresh issues: ' + err.message);
   }
@@ -2628,9 +2868,58 @@ async function deleteProject(id) {
 
 // ─── Quick Wins Logic ─────────────────────────────────────────────────────────
 
-// Stub — full implementation in Task 8
 function renderQuickWins() {
-  // Will be implemented in Task 8
+  const section  = document.getElementById('quick-wins-section');
+  const list     = document.getElementById('quick-wins-list');
+  const countEl  = document.getElementById('quick-wins-count');
+
+  // Heuristic: all reviewers have approved AND priority is high or medium
+  const reviewers = (state.config && state.config.reviewers) ? state.config.reviewers : [];
+
+  const wins = state.issues.filter(issue => {
+    if (issue.priority !== 'high' && issue.priority !== 'medium') return false;
+    if (issue.status === 'done' || issue.status === 'closed') return false;
+    if (reviewers.length === 0) return false;
+    const reviews = issue.reviews || {};
+    return reviewers.every(r => reviews[r] && reviews[r].verdict === 'approve');
+  });
+
+  if (wins.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = '';
+  countEl.textContent = wins.length;
+
+  list.innerHTML = wins.map(issue => {
+    const priorityClass = `badge-priority-${issue.priority}`;
+    const labels = (issue.labels || []).map(l =>
+      `<span class="badge badge-label">${escHtml(l)}</span>`
+    ).join('');
+    const projectName = issue.projectId
+      ? (state.projects.find(p => p.id === issue.projectId) || {}).name || ''
+      : '';
+
+    return `
+      <div class="qw-card" data-id="${issue.id}" title="Click to jump to this issue">
+        <div class="qw-card-header">
+          <span class="qw-card-id">#${issue.id}</span>
+          <span class="badge ${priorityClass}">${capitalize(issue.priority)}</span>
+        </div>
+        <div class="qw-card-title">${escHtml(issue.title || '')}</div>
+        <div class="qw-card-meta">
+          ${labels}
+          ${projectName ? `<span class="qw-card-project">${escHtml(projectName)}</span>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+
+  list.querySelectorAll('.qw-card').forEach(card => {
+    card.addEventListener('click', () => {
+      scrollToIssueRow(Number(card.dataset.id));
+    });
+  });
 }
 
 
@@ -2686,6 +2975,107 @@ function formatVote(userVote) {
   if (userVote.verdict === 'approve') return '<span style="color:var(--green)">Approved</span>';
   if (userVote.verdict === 'reject')  return '<span style="color:var(--red)">Rejected</span>';
   return escHtml(userVote.verdict);
+}
+
+
+// ─── Error Detection Helpers ──────────────────────────────────────────────────
+
+/**
+ * Parse warnings from GET /issues response and show structured error banners.
+ * Warning text examples:
+ *   "Malformed JSON in issues/5.json: ..."
+ *   "Missing directory: projects"
+ *   "Missing config.json"
+ */
+function handleIssueWarnings(warnings, workspace) {
+  const prompts = [];
+
+  warnings.forEach(w => {
+    const wl = w.toLowerCase();
+
+    // Scenario 1: Malformed issue JSON
+    // Try to extract issue id from strings like "issues/5.json" or "issue 5"
+    const malformedMatch = w.match(/issues[/\\](\d+)\.json/i);
+    if (wl.includes('malformed') || wl.includes('json') || malformedMatch) {
+      const id  = malformedMatch ? malformedMatch[1] : '?';
+      const raw = w.replace(/^[^:]+:\s*/, ''); // strip "Malformed JSON in ...: "
+      prompts.push({
+        label: `Fix #1 — repair issue ${id}`,
+        text: `Fix the malformed JSON in \`${workspace}/.issuetracker/issues/${id}.json\` — here is the current content: \`${raw}\`. Repair it to match the issue schema`,
+      });
+      prompts.push({
+        label: `Fix #2 — delete issue ${id}`,
+        text: `Delete \`${workspace}/.issuetracker/issues/${id}.json\` and clean up any references to issue #${id} in other issues' \`blockedBy\` arrays`,
+      });
+      return;
+    }
+
+    // Scenario 2: Missing subdirectory
+    const dirMatch = w.match(/missing\s+(?:directory|dir)[:\s]+["']?([^\s"']+)/i)
+                  || w.match(/directory\s+["']?([^\s"']+)["']?\s+(?:missing|not found)/i);
+    if (dirMatch) {
+      const dir = dirMatch[1];
+      prompts.push({
+        label: `Fix #1 — recreate ${dir}`,
+        text: `Recreate the missing \`${dir}\` directory in \`${workspace}/.issuetracker/\` and regenerate any folders referenced by existing issues`,
+      });
+      prompts.push({
+        label: `Fix #2 — clean up refs to ${dir}`,
+        text: `Clean up all references in \`${workspace}/.issuetracker/issues/*.json\` that point to the missing \`${dir}\` directory`,
+      });
+      return;
+    }
+
+    // Scenario 3: Missing / corrupt config.json
+    if (wl.includes('config') && (wl.includes('missing') || wl.includes('corrupt') || wl.includes('invalid'))) {
+      prompts.push({
+        label: 'Fix — rebuild config.json',
+        text: `Rebuild \`${workspace}/.issuetracker/config.json\` by scanning existing \`issues/\` and \`projects/\` folders to determine correct \`nextIssueId\`, \`nextProjectId\`, and reviewer list`,
+      });
+      return;
+    }
+
+    // Generic warning — just surface the text
+    prompts.push({ label: 'Warning', text: w });
+  });
+
+  const summary = warnings.length === 1
+    ? 'Warning loading issues'
+    : `${warnings.length} warnings loading issues`;
+
+  showError(summary, prompts);
+}
+
+/**
+ * Scenario 4: After loading, check if any issue references a projectId not in state.projects.
+ */
+function checkMissingProjects() {
+  const knownIds = new Set(state.projects.map(p => p.id));
+  const missingIds = new Set();
+
+  state.issues.forEach(issue => {
+    if (issue.projectId != null && !knownIds.has(issue.projectId)) {
+      missingIds.add(issue.projectId);
+    }
+  });
+
+  if (missingIds.size === 0) return;
+
+  const workspace = state.currentWorkspace || '';
+  const prompts = [];
+  missingIds.forEach(id => {
+    prompts.push({
+      label: `Fix #1 — recreate project ${id}`,
+      text: `Recreate \`${workspace}/.issuetracker/projects/${id}.json\` based on issues that reference projectId ${id}`,
+    });
+    prompts.push({
+      label: `Fix #2 — reassign issues for project ${id}`,
+      text: `Reassign all issues referencing projectId ${id} to a different project or remove their project association`,
+    });
+  });
+
+  const idList = [...missingIds].join(', ');
+  showError(`Missing project file(s): project ID(s) ${idList} referenced by issues but not found`, prompts);
 }
 
 
