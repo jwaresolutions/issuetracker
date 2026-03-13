@@ -902,6 +902,191 @@
     .blocker-resolved { background: rgba(63,185,80,0.15); color: var(--green); border: 1px solid rgba(63,185,80,0.3); }
     .blocker-badge:hover { opacity: 0.8; }
 
+    /* ─── Row Action Buttons ─── */
+    .row-actions {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+    .row-action-btn {
+      background: none;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 3px 5px;
+      font-size: 12px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .row-action-btn:hover { border-color: var(--border); background: var(--bg-hover); color: var(--text); }
+    .row-action-btn.delete-btn:hover { color: var(--red); border-color: rgba(248,81,73,0.4); background: rgba(248,81,73,0.08); }
+
+    /* ─── Tag Input ─── */
+    .tag-input-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 5px 8px;
+      min-height: 38px;
+      align-items: center;
+      cursor: text;
+      transition: border-color 0.15s;
+    }
+    .tag-input-wrapper:focus-within { border-color: var(--accent); }
+    .tag-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2px 8px;
+      font-size: 11px;
+      color: var(--text);
+      font-family: var(--font-mono);
+      white-space: nowrap;
+    }
+    .tag-chip-remove {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 13px;
+      line-height: 1;
+      padding: 0;
+      margin-left: 2px;
+      transition: color 0.15s;
+    }
+    .tag-chip-remove:hover { color: var(--red); }
+    .tag-input-field {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 13px;
+      font-family: inherit;
+      min-width: 100px;
+      flex: 1;
+    }
+    .tag-input-field::placeholder { color: var(--text-muted); }
+
+    /* ─── Blocked-By Multi-Select ─── */
+    .blocked-by-wrapper {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+    .blocked-by-wrapper:focus-within { border-color: var(--accent); }
+    .blocked-by-search {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      font-size: 13px;
+      font-family: inherit;
+      padding: 6px 10px;
+      outline: none;
+    }
+    .blocked-by-search::placeholder { color: var(--text-muted); }
+    .blocked-by-options {
+      max-height: 120px;
+      overflow-y: auto;
+    }
+    .blocked-by-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--text-muted);
+      transition: background 0.1s;
+    }
+    .blocked-by-option:hover { background: var(--bg-hover); }
+    .blocked-by-option.selected { background: rgba(88,166,255,0.08); color: var(--text); }
+    .blocked-by-option input[type="checkbox"] { accent-color: var(--accent); }
+    .blocked-by-selected-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 6px;
+    }
+
+    /* ─── Reviewer Verdict Grid ─── */
+    .reviewer-verdict-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .reviewer-verdict-row {
+      display: grid;
+      grid-template-columns: 120px 1fr 1fr;
+      gap: 8px;
+      align-items: center;
+    }
+    .reviewer-verdict-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .reviewer-verdict-select {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 12px;
+      font-family: inherit;
+      padding: 5px 8px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .reviewer-verdict-select:focus { border-color: var(--accent); }
+    .reviewer-verdict-notes {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 12px;
+      font-family: var(--font-mono);
+      padding: 5px 8px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .reviewer-verdict-notes:focus { border-color: var(--accent); }
+
+    /* ─── Form rows ─── */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+
+    /* ─── Modal wide ─── */
+    .modal-wide { max-width: 720px; }
+
+    /* ─── Delete Confirm Modal ─── */
+    .delete-confirm-body {
+      padding: 20px;
+      font-size: 14px;
+      color: var(--text);
+    }
+    .delete-confirm-body strong { color: var(--red); }
+
     /* Expand indicator rotation */
     tr.expanded .expand-indicator { transform: rotate(90deg); }
     .expand-indicator {
@@ -1072,10 +1257,16 @@
     <!-- Toolbar -->
     <div id="toolbar">
       <div id="issue-count">Showing <span id="count-visible">0</span> of <span id="count-total">0</span> issues</div>
-      <button class="btn-primary" id="btn-new-issue">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        New Issue
-      </button>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn-ghost" id="btn-new-project" style="font-size:13px;padding:6px 12px;display:flex;align-items:center;gap:6px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New Project
+        </button>
+        <button class="btn-primary" id="btn-new-issue">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New Issue
+        </button>
+      </div>
     </div>
 
     <!-- Issues Table -->
@@ -1093,6 +1284,7 @@
             <th>Reviews</th>
             <th>Vote</th>
             <th data-sort="updatedAt">Updated</th>
+            <th></th>
           </tr>
         </thead>
         <tbody id="issues-tbody">
@@ -1126,18 +1318,136 @@
 
 <!-- ─── Modals (populated in Tasks 7–9) ─── -->
 
-<!-- Issue Detail / Edit Modal placeholder -->
+<!-- Issue Create/Edit Modal -->
 <div class="modal-overlay" id="modal-issue-overlay">
-  <div class="modal" id="modal-issue">
+  <div class="modal modal-wide" id="modal-issue">
     <div class="modal-header">
-      <h3 id="modal-issue-title">Issue</h3>
+      <h3 id="modal-issue-title">New Issue</h3>
       <button class="modal-close" data-close="modal-issue-overlay">&times;</button>
     </div>
     <div class="modal-body" id="modal-issue-body">
-      <!-- populated in Task 7 -->
+      <div class="form-group">
+        <label for="issue-title">Title *</label>
+        <input type="text" id="issue-title" class="form-control" placeholder="Issue title" />
+      </div>
+      <div class="form-group">
+        <label for="issue-description">Description</label>
+        <textarea id="issue-description" class="form-control" placeholder="Describe the issue…" style="min-height:90px;"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="issue-status">Status</label>
+          <select id="issue-status" class="form-control">
+            <option value="open">Open</option>
+            <option value="in_progress">In Progress</option>
+            <option value="done">Done</option>
+            <option value="closed">Closed</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="issue-priority">Priority</label>
+          <select id="issue-priority" class="form-control">
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="issue-project">Project</label>
+          <select id="issue-project" class="form-control">
+            <option value="">None</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="issue-cycle">Cycle</label>
+          <input type="number" id="issue-cycle" class="form-control" placeholder="e.g. 3" min="1" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Labels</label>
+        <div class="tag-input-wrapper" id="labels-tag-wrapper">
+          <input type="text" class="tag-input-field" id="labels-tag-input" placeholder="Type label and press Enter…" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Personas</label>
+        <div class="tag-input-wrapper" id="personas-tag-wrapper">
+          <input type="text" class="tag-input-field" id="personas-tag-input" placeholder="Type persona and press Enter…" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Files</label>
+        <div class="tag-input-wrapper" id="files-tag-wrapper">
+          <input type="text" class="tag-input-field" id="files-tag-input" placeholder="Type filename and press Enter…" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Blocked By</label>
+        <div class="blocked-by-wrapper">
+          <input type="text" class="blocked-by-search" id="blocked-by-search" placeholder="Search issues…" />
+          <div class="blocked-by-options" id="blocked-by-options"></div>
+        </div>
+        <div class="blocked-by-selected-chips" id="blocked-by-chips"></div>
+      </div>
+      <div class="form-group" id="reviewer-verdicts-group" style="display:none;">
+        <label>Reviewer Verdicts</label>
+        <div class="reviewer-verdict-grid" id="reviewer-verdict-grid"></div>
+      </div>
     </div>
     <div class="modal-footer" id="modal-issue-footer">
-      <!-- populated in Task 7 -->
+      <button class="btn-ghost" data-close="modal-issue-overlay">Cancel</button>
+      <button class="btn-primary" id="btn-save-issue">Create Issue</button>
+    </div>
+  </div>
+</div>
+
+<!-- Project Create/Edit Modal -->
+<div class="modal-overlay" id="modal-project-overlay">
+  <div class="modal" id="modal-project">
+    <div class="modal-header">
+      <h3 id="modal-project-title">New Project</h3>
+      <button class="modal-close" data-close="modal-project-overlay">&times;</button>
+    </div>
+    <div class="modal-body" id="modal-project-body">
+      <div class="form-group">
+        <label for="proj-name">Name *</label>
+        <input type="text" id="proj-name" class="form-control" placeholder="Project name" />
+      </div>
+      <div class="form-group">
+        <label for="proj-description">Description</label>
+        <textarea id="proj-description" class="form-control" placeholder="Optional description…" style="min-height:70px;"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="proj-status">Status</label>
+        <select id="proj-status" class="form-control">
+          <option value="active">Active</option>
+          <option value="completed">Completed</option>
+          <option value="archived">Archived</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" data-close="modal-project-overlay">Cancel</button>
+      <button class="btn-primary" id="btn-save-project">Create Project</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal-overlay" id="modal-delete-overlay">
+  <div class="modal" id="modal-delete" style="max-width:420px;">
+    <div class="modal-header">
+      <h3 id="modal-delete-title">Confirm Delete</h3>
+      <button class="modal-close" data-close="modal-delete-overlay">&times;</button>
+    </div>
+    <div class="delete-confirm-body" id="modal-delete-body">
+      Are you sure you want to delete this?
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" data-close="modal-delete-overlay">Cancel</button>
+      <button class="btn-danger" id="btn-confirm-delete">Delete</button>
     </div>
   </div>
 </div>
@@ -1601,6 +1911,16 @@ function renderTable() {
         <td class="col-muted">${formatReviewSummary(issue.reviews)}</td>
         <td class="col-muted">${formatVote(issue.userVote)}</td>
         <td class="col-meta">${formatDate(issue.updatedAt)}</td>
+        <td>
+          <div class="row-actions">
+            <button class="row-action-btn edit-issue-btn" data-id="${issue.id}" title="Edit issue">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="row-action-btn delete-btn delete-issue-btn" data-id="${issue.id}" data-title="${escHtml(issue.title || '')}" title="Delete issue">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            </button>
+          </div>
+        </td>
       </tr>`);
 
     if (isExpanded) {
@@ -1633,6 +1953,26 @@ function renderTable() {
       scrollToIssueRow(targetId);
     });
   });
+
+  // Attach edit issue button handlers
+  tbody.querySelectorAll('.edit-issue-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const issue = state.issues.find(i => i.id === Number(btn.dataset.id));
+      if (issue) openIssueModal(issue);
+    });
+  });
+
+  // Attach delete issue button handlers
+  tbody.querySelectorAll('.delete-issue-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      openDeleteConfirm({
+        title: btn.dataset.title,
+        onConfirm: () => deleteIssue(Number(btn.dataset.id)),
+      });
+    });
+  });
 }
 
 function toggleExpandRow(issueId) {
@@ -1645,7 +1985,7 @@ function toggleExpandRow(issueId) {
 }
 
 function buildExpandedRowHtml(issue) {
-  const colSpan = 10;
+  const colSpan = 11;
   const sections = [];
 
   // Description
@@ -1845,9 +2185,10 @@ function closeModal(overlayId) {
   document.getElementById(overlayId).classList.remove('open');
 }
 
-// Close buttons
-document.querySelectorAll('[data-close]').forEach(btn => {
-  btn.addEventListener('click', () => closeModal(btn.dataset.close));
+// Close buttons (includes dynamically-added modals via event delegation)
+document.addEventListener('click', e => {
+  const btn = e.target.closest('[data-close]');
+  if (btn) closeModal(btn.dataset.close);
 });
 
 // Close on overlay click
@@ -1871,10 +2212,418 @@ document.getElementById('btn-settings').addEventListener('click', () => {
   openModal('modal-settings-overlay');
 });
 
-// New Issue button (placeholder — Task 7)
+// New Issue button
 document.getElementById('btn-new-issue').addEventListener('click', () => {
-  openModal('modal-issue-overlay');
+  openIssueModal(null);
 });
+
+// New Project button
+document.getElementById('btn-new-project').addEventListener('click', () => {
+  openProjectModal(null);
+});
+
+
+// ─── Tag Input Helper ─────────────────────────────────────────────────────────
+
+function makeTagInput(wrapperId, inputId) {
+  const wrapper = document.getElementById(wrapperId);
+  const input   = document.getElementById(inputId);
+  const tags    = [];
+
+  function renderChips() {
+    wrapper.querySelectorAll('.tag-chip').forEach(c => c.remove());
+    tags.forEach((tag, idx) => {
+      const chip = document.createElement('span');
+      chip.className = 'tag-chip';
+      chip.innerHTML = `${escHtml(tag)}<button class="tag-chip-remove" type="button" aria-label="Remove">&times;</button>`;
+      chip.querySelector('.tag-chip-remove').addEventListener('click', () => {
+        tags.splice(idx, 1);
+        renderChips();
+      });
+      wrapper.insertBefore(chip, input);
+    });
+  }
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const val = input.value.trim();
+      if (val && !tags.includes(val)) {
+        tags.push(val);
+        renderChips();
+      }
+      input.value = '';
+    } else if (e.key === 'Backspace' && input.value === '' && tags.length > 0) {
+      tags.pop();
+      renderChips();
+    }
+  });
+
+  wrapper.addEventListener('click', () => input.focus());
+
+  return {
+    getTags: () => [...tags],
+    setTags: (arr) => {
+      tags.length = 0;
+      (arr || []).forEach(t => tags.push(t));
+      renderChips();
+    },
+    clear: () => {
+      tags.length = 0;
+      input.value = '';
+      renderChips();
+    },
+  };
+}
+
+
+// ─── Blocked-By Multi-Select Helper ──────────────────────────────────────────
+
+function makeBlockedBySelect(currentIssueId) {
+  const searchInput = document.getElementById('blocked-by-search');
+  const optionsEl   = document.getElementById('blocked-by-options');
+  const chipsEl     = document.getElementById('blocked-by-chips');
+  const selected    = new Set();
+
+  function renderOptions(query) {
+    const q = (query || '').toLowerCase();
+    const candidates = state.issues.filter(i =>
+      i.id !== currentIssueId &&
+      (q === '' ||
+        String(i.id).includes(q) ||
+        (i.title || '').toLowerCase().includes(q))
+    );
+    optionsEl.innerHTML = candidates.slice(0, 30).map(i => {
+      const isSel = selected.has(i.id);
+      return `<label class="blocked-by-option${isSel ? ' selected' : ''}">
+        <input type="checkbox" value="${i.id}" ${isSel ? 'checked' : ''} />
+        <span class="col-id" style="font-size:11px;font-family:var(--font-mono)">#${i.id}</span>
+        <span>${escHtml(i.title || '')}</span>
+      </label>`;
+    }).join('');
+    optionsEl.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const id = Number(cb.value);
+        if (cb.checked) selected.add(id); else selected.delete(id);
+        renderOptions(searchInput.value);
+        renderChips();
+      });
+    });
+  }
+
+  function renderChips() {
+    chipsEl.innerHTML = [...selected].map(id => {
+      const issue = state.issues.find(i => i.id === id);
+      const label = issue ? `#${id} — ${escHtml(issue.title || '')}` : `#${id}`;
+      return `<span class="tag-chip" data-id="${id}">${label}<button class="tag-chip-remove" type="button">&times;</button></span>`;
+    }).join('');
+    chipsEl.querySelectorAll('.tag-chip-remove').forEach(btn => {
+      const id = Number(btn.closest('.tag-chip').dataset.id);
+      btn.addEventListener('click', () => {
+        selected.delete(id);
+        renderOptions(searchInput.value);
+        renderChips();
+      });
+    });
+  }
+
+  searchInput.value = '';
+  searchInput.addEventListener('input', () => renderOptions(searchInput.value));
+  renderOptions('');
+
+  return {
+    getSelected: () => [...selected],
+    setSelected: (ids) => {
+      selected.clear();
+      (ids || []).forEach(id => selected.add(id));
+      renderOptions('');
+      renderChips();
+    },
+    clear: () => {
+      selected.clear();
+      searchInput.value = '';
+      renderOptions('');
+      renderChips();
+    },
+  };
+}
+
+
+// ─── Reviewer Verdicts Grid Helper ───────────────────────────────────────────
+
+function buildReviewerVerdictGrid(existingReviews) {
+  const reviewers = (state.config && state.config.reviewers) ? state.config.reviewers : [];
+  const grid = document.getElementById('reviewer-verdict-grid');
+  const group = document.getElementById('reviewer-verdicts-group');
+
+  if (reviewers.length === 0) {
+    group.style.display = 'none';
+    return;
+  }
+  group.style.display = '';
+
+  grid.innerHTML = reviewers.map(name => {
+    const r = (existingReviews || {})[name] || {};
+    const verdict = r.verdict || '';
+    const notes   = escHtml(r.notes || '');
+    return `
+      <div class="reviewer-verdict-row" data-reviewer="${escHtml(name)}">
+        <div class="reviewer-verdict-name" title="${escHtml(name)}">${escHtml(name)}</div>
+        <select class="reviewer-verdict-select" data-field="verdict">
+          <option value="">Pending</option>
+          <option value="approve" ${verdict === 'approve' ? 'selected' : ''}>Approve</option>
+          <option value="defer"   ${verdict === 'defer'   ? 'selected' : ''}>Defer</option>
+          <option value="reject"  ${verdict === 'reject'  ? 'selected' : ''}>Reject</option>
+        </select>
+        <input type="text" class="reviewer-verdict-notes" data-field="notes" placeholder="Notes…" value="${notes}" />
+      </div>`;
+  }).join('');
+}
+
+function collectReviews() {
+  const grid = document.getElementById('reviewer-verdict-grid');
+  const reviews = {};
+  grid.querySelectorAll('.reviewer-verdict-row').forEach(row => {
+    const name    = row.dataset.reviewer;
+    const verdict = row.querySelector('[data-field="verdict"]').value || null;
+    const notes   = row.querySelector('[data-field="notes"]').value.trim();
+    reviews[name] = { verdict, notes };
+  });
+  return reviews;
+}
+
+
+// ─── Issue Modal ──────────────────────────────────────────────────────────────
+
+let _issueModal = null;  // holds tag input handles
+
+function openIssueModal(issue) {
+  // Populate project dropdown
+  const projSel = document.getElementById('issue-project');
+  projSel.innerHTML = '<option value="">None</option>';
+  state.projects.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = String(p.id);
+    opt.textContent = p.name;
+    projSel.appendChild(opt);
+  });
+
+  // Set up tag inputs
+  const labelsCtrl   = makeTagInput('labels-tag-wrapper',   'labels-tag-input');
+  const personasCtrl = makeTagInput('personas-tag-wrapper', 'personas-tag-input');
+  const filesCtrl    = makeTagInput('files-tag-wrapper',    'files-tag-input');
+
+  // Set up blocked-by
+  const blockedByCtrl = makeBlockedBySelect(issue ? issue.id : null);
+
+  if (issue) {
+    // Edit mode
+    document.getElementById('modal-issue-title').textContent = `Edit Issue #${issue.id}`;
+    document.getElementById('btn-save-issue').textContent = 'Save Changes';
+    document.getElementById('issue-title').value = issue.title || '';
+    document.getElementById('issue-description').value = issue.description || '';
+    document.getElementById('issue-status').value = issue.status || 'open';
+    document.getElementById('issue-priority').value = issue.priority || 'medium';
+    projSel.value = issue.projectId ? String(issue.projectId) : '';
+    document.getElementById('issue-cycle').value = issue.cycle != null ? issue.cycle : '';
+    labelsCtrl.setTags(issue.labels || []);
+    personasCtrl.setTags(issue.personas || []);
+    filesCtrl.setTags(issue.files || []);
+    blockedByCtrl.setSelected(issue.blockedBy || []);
+    buildReviewerVerdictGrid(issue.reviews || {});
+  } else {
+    // Create mode
+    document.getElementById('modal-issue-title').textContent = 'New Issue';
+    document.getElementById('btn-save-issue').textContent = 'Create Issue';
+    document.getElementById('issue-title').value = '';
+    document.getElementById('issue-description').value = '';
+    document.getElementById('issue-status').value = 'open';
+    document.getElementById('issue-priority').value = 'medium';
+    projSel.value = '';
+    document.getElementById('issue-cycle').value = '';
+    labelsCtrl.clear();
+    personasCtrl.clear();
+    filesCtrl.clear();
+    blockedByCtrl.clear();
+    buildReviewerVerdictGrid({});
+  }
+
+  _issueModal = { labelsCtrl, personasCtrl, filesCtrl, blockedByCtrl, editingId: issue ? issue.id : null };
+
+  openModal('modal-issue-overlay');
+}
+
+document.getElementById('btn-save-issue').addEventListener('click', async () => {
+  if (!state.currentWorkspace || !_issueModal) return;
+
+  const title = document.getElementById('issue-title').value.trim();
+  if (!title) {
+    document.getElementById('issue-title').focus();
+    return;
+  }
+
+  const cycleVal = document.getElementById('issue-cycle').value.trim();
+  const projVal  = document.getElementById('issue-project').value;
+
+  const body = {
+    title,
+    description: document.getElementById('issue-description').value.trim(),
+    status:      document.getElementById('issue-status').value,
+    priority:    document.getElementById('issue-priority').value,
+    projectId:   projVal ? Number(projVal) : null,
+    cycle:       cycleVal !== '' ? Number(cycleVal) : null,
+    labels:      _issueModal.labelsCtrl.getTags(),
+    personas:    _issueModal.personasCtrl.getTags(),
+    files:       _issueModal.filesCtrl.getTags(),
+    blockedBy:   _issueModal.blockedByCtrl.getSelected(),
+    reviews:     collectReviews(),
+  };
+
+  const btn = document.getElementById('btn-save-issue');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  try {
+    if (_issueModal.editingId != null) {
+      await api.updateIssue(state.currentWorkspace, _issueModal.editingId, body);
+    } else {
+      await api.createIssue(state.currentWorkspace, body);
+    }
+    closeModal('modal-issue-overlay');
+    await refreshIssues();
+  } catch (err) {
+    showError('Failed to save issue: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = _issueModal && _issueModal.editingId != null ? 'Save Changes' : 'Create Issue';
+  }
+});
+
+
+// ─── Project Modal ────────────────────────────────────────────────────────────
+
+let _projectEditingId = null;
+
+function openProjectModal(project) {
+  if (project) {
+    document.getElementById('modal-project-title').textContent = `Edit Project: ${project.name}`;
+    document.getElementById('btn-save-project').textContent = 'Save Changes';
+    document.getElementById('proj-name').value = project.name || '';
+    document.getElementById('proj-description').value = project.description || '';
+    document.getElementById('proj-status').value = project.status || 'active';
+    _projectEditingId = project.id;
+  } else {
+    document.getElementById('modal-project-title').textContent = 'New Project';
+    document.getElementById('btn-save-project').textContent = 'Create Project';
+    document.getElementById('proj-name').value = '';
+    document.getElementById('proj-description').value = '';
+    document.getElementById('proj-status').value = 'active';
+    _projectEditingId = null;
+  }
+  openModal('modal-project-overlay');
+}
+
+document.getElementById('btn-save-project').addEventListener('click', async () => {
+  if (!state.currentWorkspace) return;
+
+  const name = document.getElementById('proj-name').value.trim();
+  if (!name) {
+    document.getElementById('proj-name').focus();
+    return;
+  }
+
+  const body = {
+    name,
+    description: document.getElementById('proj-description').value.trim(),
+    status: document.getElementById('proj-status').value,
+  };
+
+  const btn = document.getElementById('btn-save-project');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  try {
+    if (_projectEditingId != null) {
+      await api.updateProject(state.currentWorkspace, _projectEditingId, body);
+    } else {
+      await api.createProject(state.currentWorkspace, body);
+    }
+    closeModal('modal-project-overlay');
+    await refreshProjects();
+  } catch (err) {
+    showError('Failed to save project: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = _projectEditingId != null ? 'Save Changes' : 'Create Project';
+  }
+});
+
+
+// ─── Delete Confirm Dialog ────────────────────────────────────────────────────
+
+let _deleteConfirmCallback = null;
+
+function openDeleteConfirm({ title, onConfirm }) {
+  document.getElementById('modal-delete-body').innerHTML =
+    `Are you sure you want to delete <strong>${escHtml(title)}</strong>? This cannot be undone.`;
+  _deleteConfirmCallback = onConfirm;
+  openModal('modal-delete-overlay');
+}
+
+document.getElementById('btn-confirm-delete').addEventListener('click', async () => {
+  if (!_deleteConfirmCallback) return;
+  const btn = document.getElementById('btn-confirm-delete');
+  btn.disabled = true;
+  btn.textContent = 'Deleting…';
+  try {
+    await _deleteConfirmCallback();
+    closeModal('modal-delete-overlay');
+  } catch (err) {
+    showError('Delete failed: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Delete';
+    _deleteConfirmCallback = null;
+  }
+});
+
+
+// ─── CRUD Refresh Helpers ─────────────────────────────────────────────────────
+
+async function refreshIssues() {
+  if (!state.currentWorkspace) return;
+  try {
+    const res = await api.getIssues(state.currentWorkspace);
+    state.issues = res.issues || [];
+    renderStats();
+    populateLabelFilter();
+    renderTable();
+  } catch (err) {
+    showError('Failed to refresh issues: ' + err.message);
+  }
+}
+
+async function refreshProjects() {
+  if (!state.currentWorkspace) return;
+  try {
+    const res = await api.getProjects(state.currentWorkspace);
+    state.projects = res.projects || [];
+    populateProjectFilter();
+    renderTable();
+  } catch (err) {
+    showError('Failed to refresh projects: ' + err.message);
+  }
+}
+
+async function deleteIssue(id) {
+  await api.deleteIssue(state.currentWorkspace, id);
+  await refreshIssues();
+}
+
+async function deleteProject(id) {
+  await api.deleteProject(state.currentWorkspace, id);
+  await refreshProjects();
+}
 
 
 // ─── Quick Wins Logic ─────────────────────────────────────────────────────────
