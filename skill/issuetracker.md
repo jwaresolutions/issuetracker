@@ -298,11 +298,25 @@ Return issues where:
 
 ## Automatic Behavior
 
+### Suggesting status updates
+
 When Claude fixes a bug or implements a feature during a coding session, and a tracked issue appears to match the work done, Claude should **suggest** updating the issue:
 
 > "This looks like it resolves issue #4 (Login button broken on mobile). Would you like me to mark it as done?"
 
 **Do NOT auto-close or auto-update issues without explicit user confirmation.**
+
+### Commit-linked issue detection
+
+When creating git commits, scan the commit message for issue references like `#N` (e.g., `fix login validation (#4)`). If a referenced issue exists in `.issuetracker/issues/`, suggest updating its status:
+
+> "Commit references issue #4. Current status is `open`. Would you like me to mark it as `done`?"
+
+This applies to:
+- Commit messages containing `#N`, `fixes #N`, `closes #N`, `resolves #N`
+- Multiple references in one commit (e.g., `#4, #7`)
+
+Always confirm before making changes — never auto-update.
 
 ---
 

@@ -597,6 +597,86 @@
       font-size: 11px;
     }
 
+    /* checkbox column */
+    .check-col {
+      width: 32px;
+      text-align: center;
+    }
+
+    .check-col input[type="checkbox"] {
+      cursor: pointer;
+      accent-color: var(--accent);
+      width: 14px;
+      height: 14px;
+    }
+
+    tr.row-selected td {
+      background: rgba(88, 166, 255, 0.07);
+    }
+
+    /* ─── Bulk Action Bar ─── */
+    #bulk-action-bar {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 200;
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border);
+      padding: 10px 24px;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #bulk-action-bar.visible {
+      display: flex;
+    }
+
+    #bulk-selected-count {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-right: 4px;
+      white-space: nowrap;
+    }
+
+    .bulk-action-btn {
+      padding: 5px 12px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+
+    .bulk-action-btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--text-muted);
+    }
+
+    .bulk-action-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    #bulk-deselect-btn {
+      margin-left: auto;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      padding: 5px 8px;
+    }
+
+    #bulk-deselect-btn:hover {
+      color: var(--text);
+    }
+
     /* Expand row */
     .expand-row td {
       padding: 0 !important;
@@ -1100,6 +1180,70 @@
     }
     .tag-input-field::placeholder { color: var(--text-muted); }
 
+    /* ─── Label Autocomplete Dropdown ─── */
+    .tag-autocomplete {
+      position: relative;
+    }
+    .tag-autocomplete-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-top: 2px;
+      max-height: 160px;
+      overflow-y: auto;
+      z-index: 200;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+    .tag-autocomplete-dropdown.open { display: block; }
+    .tag-autocomplete-item {
+      padding: 6px 10px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .tag-autocomplete-item:hover,
+    .tag-autocomplete-item.active { background: var(--bg-hover); }
+
+    /* ─── Settings Labels Section ─── */
+    .settings-labels-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+      min-height: 24px;
+    }
+    .settings-label-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2px 8px;
+      font-size: 11px;
+      color: var(--text);
+      font-family: var(--font-mono);
+    }
+    .settings-label-chip-remove {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 13px;
+      line-height: 1;
+      padding: 0;
+      margin-left: 2px;
+      transition: color 0.15s;
+    }
+    .settings-label-chip-remove:hover { color: var(--red); }
+
     /* ─── Blocked-By Multi-Select ─── */
     .blocked-by-wrapper {
       background: var(--bg-elevated);
@@ -1402,6 +1546,7 @@
         <thead>
           <tr>
             <th class="expand-col"></th>
+            <th class="check-col"><input type="checkbox" id="select-all-checkbox" title="Select all visible"></th>
             <th data-sort="id">#</th>
             <th data-sort="title">Title</th>
             <th data-sort="status">Status</th>
@@ -1494,8 +1639,11 @@
       </div>
       <div class="form-group">
         <label>Labels</label>
-        <div class="tag-input-wrapper" id="labels-tag-wrapper">
-          <input type="text" class="tag-input-field" id="labels-tag-input" placeholder="Type label and press Enter…" />
+        <div class="tag-autocomplete">
+          <div class="tag-input-wrapper" id="labels-tag-wrapper">
+            <input type="text" class="tag-input-field" id="labels-tag-input" placeholder="Type label and press Enter…" />
+          </div>
+          <div class="tag-autocomplete-dropdown" id="labels-autocomplete-dropdown"></div>
         </div>
       </div>
       <div class="form-group">
@@ -1594,6 +1742,17 @@
           The directory scanned for workspace subdirectories.
         </div>
       </div>
+      <div class="form-group" id="settings-labels-group" style="display:none;">
+        <label>Labels</label>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">
+          Project-scoped labels available as autocomplete suggestions when creating issues.
+        </div>
+        <div class="settings-labels-list" id="settings-labels-list"></div>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="settings-label-input" class="form-control" placeholder="Add a label…" style="flex:1;" />
+          <button type="button" class="btn-primary" id="btn-add-settings-label" style="white-space:nowrap;">Add</button>
+        </div>
+      </div>
       <div id="settings-error" style="display:none;color:var(--red);font-size:12px;margin-top:6px;"></div>
       <div id="settings-success" style="display:none;color:var(--green);font-size:12px;margin-top:6px;"></div>
     </div>
@@ -1631,6 +1790,9 @@ const state = {
     col: 'id',
     dir: 'desc',
   },
+
+  // Bulk selection — persists across filter changes, cleared on workspace change
+  selectedIds: new Set(),
 };
 
 
@@ -1757,6 +1919,10 @@ function getWorkspace(name) {
 }
 
 async function selectWorkspace(name) {
+  // Clear bulk selection whenever workspace changes
+  state.selectedIds.clear();
+  updateBulkBar();
+
   if (!name) {
     state.currentWorkspace = null;
     state.issues = [];
@@ -2077,9 +2243,11 @@ function renderTable() {
     const isExpanded = expandedRows.has(issue.id);
     const expandedClass = isExpanded ? ' expanded' : '';
 
+    const isChecked = state.selectedIds.has(issue.id);
     rows.push(`
-      <tr data-id="${issue.id}" class="issue-row${expandedClass}" style="cursor:pointer">
+      <tr data-id="${issue.id}" class="issue-row${expandedClass}${isChecked ? ' row-selected' : ''}" style="cursor:pointer">
         <td class="expand-col"><span class="expand-indicator">▶</span></td>
+        <td class="check-col"><input type="checkbox" class="row-checkbox" data-id="${issue.id}"${isChecked ? ' checked' : ''}></td>
         <td class="col-id">#${issue.id}</td>
         <td>${escHtml(issue.title || '')}</td>
         <td><span class="badge ${statusClass}">${formatStatus(issue.status)}</span></td>
@@ -2151,6 +2319,29 @@ function renderTable() {
       });
     });
   });
+
+  // Attach row checkbox handlers
+  tbody.querySelectorAll('.row-checkbox').forEach(cb => {
+    cb.addEventListener('click', e => {
+      e.stopPropagation();
+      const id = Number(cb.dataset.id);
+      if (cb.checked) {
+        state.selectedIds.add(id);
+      } else {
+        state.selectedIds.delete(id);
+      }
+      updateBulkBar();
+      // Update row highlight
+      const tr = cb.closest('tr');
+      if (tr) tr.classList.toggle('row-selected', cb.checked);
+      // Sync select-all checkbox
+      syncSelectAllCheckbox();
+    });
+  });
+
+  // Update select-all checkbox state
+  syncSelectAllCheckbox();
+  updateBulkBar();
 }
 
 function toggleExpandRow(issueId) {
@@ -2163,7 +2354,7 @@ function toggleExpandRow(issueId) {
 }
 
 function buildExpandedRowHtml(issue) {
-  const colSpan = 11;
+  const colSpan = 12;
   const sections = [];
 
   // Description
@@ -3086,6 +3277,125 @@ async function init() {
 }
 
 init();
+
+
+// ─── Bulk Selection Logic ──────────────────────────────────────────────────────
+
+function updateBulkBar() {
+  const bar = document.getElementById('bulk-action-bar');
+  const count = state.selectedIds.size;
+  if (!bar) return;
+  if (count === 0) {
+    bar.classList.remove('visible');
+  } else {
+    bar.classList.add('visible');
+    document.getElementById('bulk-selected-count').textContent = `${count} selected`;
+  }
+}
+
+function syncSelectAllCheckbox() {
+  const cb = document.getElementById('select-all-checkbox');
+  if (!cb) return;
+  const visibleCheckboxes = document.querySelectorAll('#issues-tbody .row-checkbox');
+  const total = visibleCheckboxes.length;
+  if (total === 0) {
+    cb.checked = false;
+    cb.indeterminate = false;
+    return;
+  }
+  const checkedCount = Array.from(visibleCheckboxes).filter(c => c.checked).length;
+  if (checkedCount === 0) {
+    cb.checked = false;
+    cb.indeterminate = false;
+  } else if (checkedCount === total) {
+    cb.checked = true;
+    cb.indeterminate = false;
+  } else {
+    cb.checked = false;
+    cb.indeterminate = true;
+  }
+}
+
+async function bulkUpdateStatus(status) {
+  if (state.selectedIds.size === 0) return;
+  const ids = Array.from(state.selectedIds);
+  const ws = state.currentWorkspace;
+  if (!ws) return;
+
+  // Disable buttons during update
+  document.querySelectorAll('.bulk-action-btn').forEach(b => { b.disabled = true; });
+
+  try {
+    await Promise.all(ids.map(id =>
+      apiFetch(`/api/workspaces/${encodeURIComponent(ws)}/issues/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ status }),
+      })
+    ));
+  } catch (err) {
+    showError(`Bulk update failed: ${err.message}`);
+  }
+
+  // Clear selection and refresh
+  state.selectedIds.clear();
+  updateBulkBar();
+
+  // Re-fetch issues and re-render
+  try {
+    const issueRes = await api.getIssues(ws);
+    state.issues = issueRes.issues || [];
+    renderStats();
+    renderTable();
+    renderQuickWins();
+  } catch (err) {
+    showError(`Failed to refresh issues: ${err.message}`);
+  }
+
+  document.querySelectorAll('.bulk-action-btn').forEach(b => { b.disabled = false; });
+}
+
+// Wire up select-all checkbox (delegated — re-attach after each render)
+document.addEventListener('change', e => {
+  if (e.target.id === 'select-all-checkbox') {
+    const checked = e.target.checked;
+    document.querySelectorAll('#issues-tbody .row-checkbox').forEach(cb => {
+      cb.checked = checked;
+      const id = Number(cb.dataset.id);
+      if (checked) {
+        state.selectedIds.add(id);
+      } else {
+        state.selectedIds.delete(id);
+      }
+      const tr = cb.closest('tr');
+      if (tr) tr.classList.toggle('row-selected', checked);
+    });
+    updateBulkBar();
+  }
+});
+
+// Wire up bulk action bar buttons
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('bulk-btn-open')?.addEventListener('click', () => bulkUpdateStatus('open'));
+  document.getElementById('bulk-btn-in-progress')?.addEventListener('click', () => bulkUpdateStatus('in_progress'));
+  document.getElementById('bulk-btn-done')?.addEventListener('click', () => bulkUpdateStatus('done'));
+  document.getElementById('bulk-btn-closed')?.addEventListener('click', () => bulkUpdateStatus('closed'));
+  document.getElementById('bulk-deselect-btn')?.addEventListener('click', () => {
+    state.selectedIds.clear();
+    renderTable();
+    updateBulkBar();
+  });
+});
 </script>
+
+<!-- Bulk Action Bar -->
+<div id="bulk-action-bar">
+  <span id="bulk-selected-count">0 selected</span>
+  <button class="bulk-action-btn" id="bulk-btn-open">Mark as Open</button>
+  <button class="bulk-action-btn" id="bulk-btn-in-progress">Mark as In Progress</button>
+  <button class="bulk-action-btn" id="bulk-btn-done">Mark as Done</button>
+  <button class="bulk-action-btn" id="bulk-btn-closed">Mark as Closed</button>
+  <button id="bulk-deselect-btn">Deselect All</button>
+</div>
+
 </body>
 </html>

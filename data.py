@@ -273,6 +273,8 @@ def init_workspace(workspace: Path, name: str) -> dict:
         "name": name,
         "nextIssueId": 1,
         "nextProjectId": 1,
+        "reviewers": [],
+        "labels": [],
         "createdAt": _now_iso(),
     }
     _atomic_write(tracker / "config.json", config)

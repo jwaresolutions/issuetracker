@@ -32,17 +32,27 @@ def _default_root_path() -> Path:
     return Path(__file__).resolve().parent.parent
 
 
-def _get_root_path() -> Path:
+def _read_config_file() -> dict:
     config_file = Path(__file__).resolve().parent / "tracker.config.json"
     if config_file.exists():
         try:
             with open(config_file) as f:
-                cfg = json.load(f)
-            if "rootPath" in cfg:
-                return Path(cfg["rootPath"])
+                return json.load(f)
         except (json.JSONDecodeError, OSError):
             pass
+    return {}
+
+
+def _get_root_path() -> Path:
+    cfg = _read_config_file()
+    if cfg.get("rootPath"):
+        return Path(cfg["rootPath"])
     return _default_root_path()
+
+
+def _get_port() -> int:
+    cfg = _read_config_file()
+    return cfg.get("port", 8000)
 
 
 # ---------------------------------------------------------------------------
@@ -274,7 +284,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Issue Tracker Server")
     parser.add_argument("--root", type=str, help="Root path for project directories")
-    parser.add_argument("--port", type=int, default=8000, help="Port to listen on")
+    parser.add_argument("--port", type=int, default=None, help="Port to listen on")
     args = parser.parse_args()
 
     root = Path(args.root) if args.root else _get_root_path()
@@ -282,5 +292,6 @@ if __name__ == "__main__":
         print(f"Error: root path does not exist: {root}")
         exit(1)
 
+    port = args.port if args.port is not None else _get_port()
     app = create_app(root_path=root)
-    uvicorn.run(app, host="127.0.0.1", port=args.port)
+    uvicorn.run(app, host="127.0.0.1", port=port)
